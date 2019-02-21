@@ -16,17 +16,4 @@ const points = [
 ];
 
 const kMeans = new KMeans(points, 2);
-kMeans.next();
-kMeans.next();
-kMeans.next();
-kMeans.next();
-kMeans.next();
-kMeans.next();
-kMeans.next();
-kMeans.next();
-kMeans.next();
-kMeans.next();
-kMeans.next();
-kMeans.next();
-
-console.log(kMeans.getClusters());
+console.log(kMeans.start(20));

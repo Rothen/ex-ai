@@ -27,11 +27,29 @@ export class KMeans {
         this.setRandomCenters();
     }
 
-    public getClusters(): Cluster[] {
+    public start(maxIterations: number): Cluster[] {
+        let centersHaveChanged: boolean = true;
+
+        while (maxIterations > 0 && centersHaveChanged) {
+            this.next();
+            maxIterations--;
+            centersHaveChanged = this.centersHaveChanged();
+        }
+
         return this.clusters;
     }
 
-    public next(): void {
+    private centersHaveChanged(): boolean {
+        let centersHaveChanged = false;
+
+        for (const cluster of this.clusters) {
+            centersHaveChanged = centersHaveChanged || cluster.centerHasChanged();
+        }
+
+        return centersHaveChanged;
+    }
+
+    private next(): Point[] {
         for (const cluster of this.clusters) {
             cluster.reset();
         }
@@ -50,9 +68,13 @@ export class KMeans {
             assignedCluster.addPoint(point);
         }
 
+        const recalculatedCenters: Point[] = [];
+
         for (const cluster of this.clusters) {
-            cluster.recalculateCenter();
+            recalculatedCenters.push(cluster.recalculateCenter());
         }
+
+        return recalculatedCenters;
     }
 
     private setRandomCenters() {

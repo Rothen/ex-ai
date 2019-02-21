@@ -1,7 +1,9 @@
 import { Point } from './Point';
+import { ExMath } from './ExMath';
 
 export class Cluster {
     private points: Point[];
+    private lastCenter: Point = new Point(0, 0);
     private center: Point;
 
     constructor() {
@@ -40,16 +42,16 @@ export class Cluster {
         this.points = [];
     }
 
-    public recalculateCenter() {
-        let sumX = 0;
-        let sumY = 0;
+    public recalculateCenter(): Point {
+        let average = ExMath.average(this.points, ['x', 'y']) as {x: number, y: number};
 
-        for (const point of this.points) {
-            sumX += point.x;
-            sumY += point.y;
-        }
+        this.lastCenter = this.center;
+        this.center = new Point(average.x, average.y);
 
-        this.center.x = sumX / this.points.length;
-        this.center.y = sumY / this.points.length;
+        return this.center;
+    }
+
+    public centerHasChanged(): boolean {
+        return this.center.x !== this.lastCenter.x || this.center.y !== this.lastCenter.y;
     }
 }
