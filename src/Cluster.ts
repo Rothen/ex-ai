@@ -27,6 +27,7 @@ export class Cluster {
     }
 
     public setCenter(center: Point): void {
+        this.lastCenter = this.center;
         this.center = center;
     }
 
@@ -45,10 +46,6 @@ export class Cluster {
 
         this.center = center;
         return center;
-    }
-
-    public calculateDistance(point: Point): number {
-        return Math.sqrt(Math.pow(point.x - this.center.x, 2) + Math.pow(point.y - this.center.y, 2));
     }
 
     public reset() {

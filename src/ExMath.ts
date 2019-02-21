@@ -184,10 +184,12 @@ export abstract class ExMath {
         const propertyName: string = property;
         let percentile = 0;
 
-        if (index % 1 === 0) {
-            percentile = (percentileData[index][propertyName] + percentileData[index + 1][propertyName]) / 2;
-        } else {
-            percentile = percentileData[Math.ceil(index)][propertyName];
+        if (n > 0) {
+            if (index % 1 === 0) {
+                percentile = (percentileData[index][propertyName] + percentileData[index + 1][propertyName]) / 2;
+            } else {
+                percentile = percentileData[Math.ceil(index)][propertyName];
+            }
         }
 
         return percentile;
@@ -199,14 +201,18 @@ export abstract class ExMath {
         const index = (n * q / 100) - 1;
         let percentile = {};
 
-        for (const property of properties) {
-            const propertyName: string = property;
-            percentile[propertyName] = 0;
+        if (n > 0) {
+            for (const property of properties) {
+                const propertyName: string = property;
+                percentile[propertyName] = 0;
 
-            if (index % 1 === 0) {
-                percentile[propertyName] = (percentileData[index][propertyName] + percentileData[index + 1][propertyName]) / 2;
-            } else {
-                percentile[propertyName] = percentileData[Math.ceil(index)][propertyName];
+                if (n > 0) {
+                    if (index % 1 === 0) {
+                        percentile[propertyName] = (percentileData[index][propertyName] + percentileData[index + 1][propertyName]) / 2;
+                    } else {
+                        percentile[propertyName] = percentileData[Math.ceil(index)][propertyName];
+                    }
+                }
             }
         }
 

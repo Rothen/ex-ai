@@ -2,11 +2,11 @@ import { expect } from 'chai';
 import { KMeans, Point, Cluster } from '../src';
 
 describe('KMeans', () => {
-    let kMeans = new KMeans();
     beforeEach(() => {
     });
 
     it('should be created', () => {
+        const kMeans = new KMeans();
         expect(kMeans).to.be.ok;
     });
 
@@ -20,12 +20,11 @@ describe('KMeans', () => {
             new Point(4.5, 5),
             new Point(3.5, 4.5)
         ];
+        const kMeans: KMeans = new KMeans(testPoints, 2, [new Point(1, 1), new Point(5, 7)]);
+        const result = kMeans.start(20);
+        const clusters: Cluster[] = result.clusters;
 
-        const kMeans = new KMeans(testPoints, 2, [new Point(1, 1), new Point(5, 7)]);
-        const clusters = kMeans.start(20);
-
-        /*const centers = clusters.map((cluster) => cluster.getCenter());
-        const points = clusters.map((cluster) => cluster.getPoints());*/
+        expect(result.iterations).to.be.within(1, 4);
 
         expect(clusters).to.have.lengthOf(2);
 
@@ -65,5 +64,9 @@ describe('KMeans', () => {
 
         expect(clusterB.getPoints()[1].x).to.equal(1.5);
         expect(clusterB.getPoints()[1].y).to.equal(2);
-    })
+    });
+
+    /*
+        File-Test
+    */
 });
