@@ -1,0 +1,14 @@
+{
+    "server": {
+        "host": "testing.server.host",
+        "port": 8000,
+        "ws_port": 8001,
+        "certificate": "spec/test_files/test.cert"
+    },
+    "mqtt": {
+        "host": "testing.mqtt.host",
+        "port": 9001,
+        "user": "user",
+        "password": "TestingPassword"
+    }
+}

@@ -1,0 +1,7 @@
+src/
+spec/
+coverage/
+.nyc_output/
+node_modules/
+.gitignore
+tslint.json
