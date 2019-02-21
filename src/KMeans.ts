@@ -22,14 +22,14 @@ export class KMeans {
 
         this.calculateBoundaries();
 
-        if (centers && centers.length != k) {
+        if (centers && centers.length !== k) {
             throw new Error('Number of centers must equal k');
         }
 
         for (let i = 0; i < k; i++) {
             const cluster = new Cluster();
             if (centers[i]) {
-                cluster.setCenter(centers[i])
+                cluster.setCenter(centers[i]);
             } else {
                 cluster.setRandomCenter(this.minX, this.minY, this.maxX, this.maxY);
             }
@@ -38,7 +38,7 @@ export class KMeans {
     }
 
     public start(maxIterations: number): Cluster[] {
-        let centersHaveChanged: boolean = true;
+        let centersHaveChanged = true;
 
         while (maxIterations > 0 && centersHaveChanged) {
             this.next();
