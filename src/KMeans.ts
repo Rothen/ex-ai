@@ -11,7 +11,7 @@ export class KMeans {
     private maxX: number;
     private maxY: number;
 
-    constructor(points?: Point[], k?: number) {
+    constructor(points?: Point[], k?: number, centers?: Point[]) {
         this.points = [];
         this.clusters = [];
         this.k = k;
@@ -20,11 +20,21 @@ export class KMeans {
             this.points = points;
         }
 
-        for (let i = 0; i < k; i++) {
-            this.clusters.push(new Cluster());
+        this.calculateBoundaries();
+
+        if (centers && centers.length != k) {
+            throw new Error('Number of centers must equal k');
         }
 
-        this.setRandomCenters();
+        for (let i = 0; i < k; i++) {
+            const cluster = new Cluster();
+            if (centers[i]) {
+                cluster.setCenter(centers[i])
+            } else {
+                cluster.setRandomCenter(this.minX, this.minY, this.maxX, this.maxY);
+            }
+            this.clusters.push(cluster);
+        }
     }
 
     public start(maxIterations: number): Cluster[] {
@@ -75,17 +85,6 @@ export class KMeans {
         }
 
         return recalculatedCenters;
-    }
-
-    private setRandomCenters() {
-        this.calculateBoundaries();
-
-        for (const cluster of this.clusters) {
-            const x = (Math.random() * this.maxX) + this.minX;
-            const y = (Math.random() * this.maxY) + this.minY;
-            const center = new Point(x, y);
-            cluster.setCenter(center);
-        }
     }
 
     private calculateBoundaries() {

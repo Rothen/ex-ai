@@ -34,6 +34,19 @@ export class Cluster {
         return this.center;
     }
 
+    public getPoints(): Point[] {
+        return this.points;
+    }
+
+    public setRandomCenter(minX: number, minY: number, maxX: number, maxY: number): Point {
+        const x = (Math.random() * maxX) + minX;
+        const y = (Math.random() * maxY) + minY;
+        const center = new Point(x, y);
+
+        this.center = center;
+        return center;
+    }
+
     public calculateDistance(point: Point): number {
         return Math.sqrt(Math.pow(point.x - this.center.x, 2) + Math.pow(point.y - this.center.y, 2));
     }
