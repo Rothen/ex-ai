@@ -40,7 +40,7 @@
     "factory"
   ],
   "author": "Benjamin Ricchiuto",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Rothen/k-means/issues"
   },
