@@ -1,7 +1,7 @@
 {
-  "name": "@alkocats/k-means",
-  "version": "0.3.6",
-  "description": "k-means",
+  "name": "@alkocats/ex-ai",
+  "version": "0.0.1",
+  "description": "ExAI",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "dependencies": {
