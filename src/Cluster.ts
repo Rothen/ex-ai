@@ -1,9 +1,8 @@
-import { Point } from './Point';
-import { ExMath } from './ExMath';
+import { ExMath, Point } from '@alkocats/ex-math';
 
 export class Cluster {
     private points: Point[];
-    private lastCenter: Point = new Point(0, 0);
+    private lastCenter: Point;
     private center: Point;
 
     constructor() {
@@ -42,7 +41,7 @@ export class Cluster {
     public setRandomCenter(minX: number, minY: number, maxX: number, maxY: number): Point {
         const x = (Math.random() * maxX) + minX;
         const y = (Math.random() * maxY) + minY;
-        const center = new Point(x, y);
+        const center = {x: x, y: y};
 
         this.center = center;
         return center;
@@ -56,7 +55,7 @@ export class Cluster {
         let average = ExMath.average(this.points, ['x', 'y']) as {x: number, y: number};
 
         this.lastCenter = this.center;
-        this.center = new Point(average.x, average.y);
+        this.center = {x: average.x, y: average.y};
 
         return this.center;
     }

@@ -4,7 +4,10 @@
   "description": "k-means",
   "main": "build/index.js",
   "types": "build/index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "@alkocats/ex-math": "^0.3.8",
+    "node-cmd": "^3.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Rothen/k-means.git"
