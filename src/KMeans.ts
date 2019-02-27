@@ -45,36 +45,49 @@ export class KMeans {
     private clusters: Cluster[];
     private distanceCalculator: DistanceCalculator;
     private centerCalculator: CenterCalculator;
-    private k: number;
+    private clusterCount: number;
     private minX: number;
     private minY: number;
     private maxX: number;
     private maxY: number;
 
-    constructor(points?: Point[], k?: number, centers?: Point[]) {
-        this.points = [];
+    constructor(points: Point[] = [], clusterCount?: number, centers?: Point[]) {
+        this.points = points;
         this.clusters = [];
-        this.k = k;
-
-        if (points) {
-            this.points = points;
-        }
+        this.clusterCount = clusterCount;
 
         this.calculateBoundaries();
         this.setDistanceCalculator(new EuclidianDistanceCalculator());
         this.setCenterCalculator(new AverageCenterCalculator());
+        this.generateStartingClusters(centers);
+    }
 
-        if (centers && centers.length !== k) {
-            throw new Error('Number of centers must equal k');
-        }
-
-        for (let i = 0; i < k; i++) {
-            const cluster = new Cluster();
-            if (centers && centers[i]) {
-                cluster.setCenter(centers[i]);
-            } else {
-                cluster.setRandomCenter(this.minX, this.minY, this.maxX, this.maxY);
+    private generateStartingClusters(centers: Point[]) {
+        if (centers) {
+            if (centers.length !== this.clusterCount) {
+                throw new Error('Number of centers must equal k');
             }
+
+            this.generateStartingClustersByGivenCenters(centers);
+        } else {
+            this.generateStartingClustersByRandomCenters();
+        }
+    }
+
+    private generateStartingClustersByGivenCenters(centers: Point[]) {
+        for (let i = 0; i < this.clusterCount; i++) {
+            const cluster = new Cluster();
+
+            cluster.setCenter(centers[i]);
+            this.clusters.push(cluster);
+        }
+    }
+
+    private generateStartingClustersByRandomCenters() {
+        for (let i = 0; i < this.clusterCount; i++) {
+            const cluster = new Cluster();
+
+            cluster.setRandomCenter(this.minX, this.minY, this.maxX, this.maxY);
             this.clusters.push(cluster);
         }
     }
@@ -119,25 +132,30 @@ export class KMeans {
         }
 
         for (const point of this.points) {
-            let assignedCluster = this.clusters[0];
-
-            for (let i = 1; i < this.k; i++) {
-                const cluster = this.clusters[i];
-                const newDistance = this.distanceCalculator.calculate(point, cluster.getCenter());
-                const currentDistance = this.distanceCalculator.calculate(point, assignedCluster.getCenter());
-
-                if (newDistance <= currentDistance) {
-                    assignedCluster = cluster;
-                }
-            }
-
-            assignedCluster.addPoint(point);
+            const nearestCluster = this.getNearesCluster(point);
+            nearestCluster.addPoint(point);
         }
 
         for (const cluster of this.clusters) {
             const newCenter = this.centerCalculator.calculate(cluster.getPoints());
             cluster.setCenter(newCenter);
         }
+    }
+
+    private getNearesCluster(point: Point): Cluster {
+        let assignedCluster = this.clusters[0];
+
+        for (let i = 1; i < this.clusterCount; i++) {
+            const cluster = this.clusters[i];
+            const newDistance = this.distanceCalculator.calculate(point, cluster.getCenter());
+            const currentDistance = this.distanceCalculator.calculate(point, assignedCluster.getCenter());
+
+            if (newDistance <= currentDistance) {
+                assignedCluster = cluster;
+            }
+        }
+
+        return assignedCluster;
     }
 
     private calculateBoundaries() {
