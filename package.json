@@ -1,10 +1,13 @@
 {
-  "name": "@alkocats/k-means",
-  "version": "0.3.6",
-  "description": "k-means",
+  "name": "@alkocats/ex-ai",
+  "version": "0.0.1",
+  "description": "ExAI",
   "main": "build/index.js",
   "types": "build/index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "@alkocats/ex-math": "^0.3.8",
+    "node-cmd": "^3.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Rothen/k-means.git"
@@ -41,7 +44,7 @@
   "author": "Benjamin Ricchiuto",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Rothen/k-means/issues"
+    "url": "https://github.com/Rothen/ex-ai/issues"
   },
-  "homepage": "https://github.com/Rothen/k-means#readme"
+  "homepage": "https://github.com/Rothen/ex-ai#readme"
 }

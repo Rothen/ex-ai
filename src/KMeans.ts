@@ -1,7 +1,6 @@
 import * as fs from 'fs';
-import { Point } from './Point';
 import { Cluster } from './Cluster';
-import { ExMath } from './ExMath';
+import { ExMath, ExStat, Point } from '@alkocats/ex-math';
 
 export abstract class DistanceCalculator {
     public abstract calculate(pointA: Point, pointB: Point): number;
@@ -26,7 +25,7 @@ export abstract class CenterCalculator {
 export class AverageCenterCalculator extends CenterCalculator {
     public calculate(points: Point[]): Point {
         const average = ExMath.average(points, ['x', 'y']) as {x: number, y: number};
-        const center = new Point(average.x, average.y);
+        const center = {x: average.x, y: average.y};
 
         return center;
     }
@@ -34,8 +33,8 @@ export class AverageCenterCalculator extends CenterCalculator {
 
 export class MedianCenterCalculator extends CenterCalculator {
     public calculate(points: Point[]): Point {
-        const median = ExMath.median(points, ['x', 'y']) as {x: number, y: number};
-        const center = new Point(median.x, median.y);
+        const median = ExStat.median(points, ['x', 'y']) as {x: number, y: number};
+        const center = {x: median.x, y: median.y};
 
         return center;
     }
@@ -161,7 +160,7 @@ export class KMeans {
         for (let i = 0; i < this.clusters.length; i++) {
             const cluster = this.clusters[i];
 
-            let clusterStr = `c_x${i} = ${cluster.getCenter().x};\nc_y${i} = ${cluster.getCenter().x};\n`;
+            let clusterStr = `c_x${i} = ${cluster.getCenter().x};\nc_y${i} = ${cluster.getCenter().y};\n`;
             let clusterPointsXStr = `x${i} = [`;
             let clusterPointsYStr = `y${i} = [`;
 
