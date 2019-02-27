@@ -1,8 +1,20 @@
 language : node_js
 node_js :
- - stable
+ - 10
 install:
  - npm install
+deploy:
+  provider: npm
+  email: "alkocats.info@gmail.com"
+  api_key: $NPM_AUTH_TOKEN
+  on:
+    tags: true
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 script:
- - npm run cover 
-after_script: "cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js"
+ - npm run cover
+ - npm run build
+after_script: 
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

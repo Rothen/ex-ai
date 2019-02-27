@@ -38,8 +38,9 @@
     "cover": "nyc  -r lcov -e .ts -x \"*.spec.ts\" mocha --require ts-node/register spec/**/*.spec.ts"
   },
   "keywords": [
-    "config",
-    "factory"
+    "alkocats",
+    "ex-ai",
+    "ai"
   ],
   "author": "Benjamin Ricchiuto",
   "license": "MIT",
