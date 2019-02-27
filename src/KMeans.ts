@@ -24,19 +24,13 @@ export abstract class CenterCalculator {
 
 export class AverageCenterCalculator extends CenterCalculator {
     public calculate(points: Point[]): Point {
-        const average = ExMath.average(points, ['x', 'y']) as {x: number, y: number};
-        const center = {x: average.x, y: average.y};
-
-        return center;
+        return ExMath.average(points, ['x', 'y']) as Point;
     }
 }
 
 export class MedianCenterCalculator extends CenterCalculator {
     public calculate(points: Point[]): Point {
-        const median = ExStat.median(points, ['x', 'y']) as {x: number, y: number};
-        const center = {x: median.x, y: median.y};
-
-        return center;
+        return ExStat.median(points, ['x', 'y']) as Point;
     }
 }
 
