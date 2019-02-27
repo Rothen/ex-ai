@@ -22,16 +22,23 @@ export abstract class CenterCalculator {
     public abstract calculate(points: Point[]): Point;
 }
 
-export class AverageCenterCalculator extends CenterCalculator {
+export abstract class SimpleCenterCalculator extends CenterCalculator {
+    protected abstract exMathClass: any;
+    protected abstract exMathFnName: string;
+
     public calculate(points: Point[]): Point {
-        return ExMath.average(points, ['x', 'y']) as Point;
+        return this.exMathClass[this.exMathFnName].call(this.exMathClass, points, ['x', 'y']);
     }
 }
 
-export class MedianCenterCalculator extends CenterCalculator {
-    public calculate(points: Point[]): Point {
-        return ExStat.median(points, ['x', 'y']) as Point;
-    }
+export class AverageCenterCalculator extends SimpleCenterCalculator {
+    protected exMathClass = ExMath;
+    protected exMathFnName = 'average';
+}
+
+export class MedianCenterCalculator extends SimpleCenterCalculator {
+    protected exMathClass = ExStat;
+    protected exMathFnName = 'median';
 }
 
 export class KMeans {
