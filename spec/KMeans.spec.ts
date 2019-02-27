@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { KMeans, Point, Cluster } from '../src';
+import { KMeans, Cluster } from '../src';
+import { Point } from '@alkocats/ex-math';
 
 describe('KMeans', () => {
     beforeEach(() => {
@@ -11,16 +12,16 @@ describe('KMeans', () => {
     });
 
     it('should calculate k-Means with defined centers correctly', () => {
-        const testPoints = [
-            new Point(1, 1),
-            new Point(1.5, 2),
-            new Point(3, 4),
-            new Point(5, 7),
-            new Point(3.5, 5),
-            new Point(4.5, 5),
-            new Point(3.5, 4.5)
+        const testPoints: Point[] = [
+            {x: 1, y: 1},
+            {x: 1.5, y: 2},
+            {x: 3, y: 4},
+            {x: 5, y: 7},
+            {x: 3.5, y: 5},
+            {x: 4.5, y: 5},
+            {x: 3.5, y: 4.5},
         ];
-        const kMeans: KMeans = new KMeans(testPoints, 2, [new Point(1, 1), new Point(5, 7)]);
+        const kMeans: KMeans = new KMeans(testPoints, 2, [{x: 1, y: 1}, {x: 5, y: 7}]);
         const result = kMeans.start(20);
         const clusters: Cluster[] = result.clusters;
 

@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Rothen/k-means.git"
+    "url": "git+https://github.com/Rothen/ex-ai.git"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
