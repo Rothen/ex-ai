@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "dependencies": {
-    "@alkocats/ex-math": "^0.3.8",
+    "@alkocats/ex-math": "0.0.6",
     "node-cmd": "^3.0.0"
   },
   "repository": {

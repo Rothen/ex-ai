@@ -28,6 +28,33 @@ export class KMeans {
         this.generateStartingClusters(centers);
     }
 
+    public start(maxIterations: number): { clusters: Cluster[], iterations: number, meanSquaredError: number } {
+        let centersHaveChanged = true;
+        let iterations = 0;
+
+        while (iterations < maxIterations && centersHaveChanged) {
+            this.next();
+            iterations++;
+            centersHaveChanged = this.centersHaveChanged();
+        }
+
+        this.calculateMeanSquaredError();
+
+        return {
+            clusters: this.clusters,
+            iterations: iterations,
+            meanSquaredError: this.meanSquaredError
+        };
+    }
+
+    public setDistanceCalculator(distancecalculator: DistanceCalculator) {
+        this.distanceCalculator = distancecalculator;
+    }
+
+    public setCenterCalculator(centerCalculator: CenterCalculator) {
+        this.centerCalculator = centerCalculator;
+    }
+
     public getClusters(): Cluster[] {
         return this.clusters;
     }
@@ -60,37 +87,12 @@ export class KMeans {
     private generateStartingClustersByRandomCenters() {
         for (let i = 0; i < this.clusterCount; i++) {
             const cluster = new Cluster();
+            const index = Math.round(Math.random() * this.points.length - 1);
+            const center = this.points[index];
 
-            cluster.setRandomCenter(this.minX, this.minY, this.maxX, this.maxY);
+            cluster.setRandomCenter({ x: center.x, y: center.y });
             this.clusters.push(cluster);
         }
-    }
-
-    public setDistanceCalculator(distancecalculator: DistanceCalculator) {
-        this.distanceCalculator = distancecalculator;
-    }
-
-    public setCenterCalculator(centerCalculator: CenterCalculator) {
-        this.centerCalculator = centerCalculator;
-    }
-
-    public start(maxIterations: number): { clusters: Cluster[], iterations: number, meanSquaredError: number } {
-        let centersHaveChanged = true;
-        let iterations = 0;
-
-        while (iterations < maxIterations && centersHaveChanged) {
-            this.next();
-            iterations++;
-            centersHaveChanged = this.centersHaveChanged();
-        }
-
-        this.calculateMeanSquaredError();
-
-        return {
-            clusters: this.clusters,
-            iterations: iterations,
-            meanSquaredError: this.meanSquaredError
-        };
     }
 
     private calculateMeanSquaredError() {
@@ -123,7 +125,7 @@ export class KMeans {
         }
 
         for (const point of this.points) {
-            const nearestCluster = this.getNearesCluster(point);
+            const nearestCluster = this.getNearestCluster(point);
             nearestCluster.addPoint(point);
         }
 
@@ -133,7 +135,7 @@ export class KMeans {
         }
     }
 
-    private getNearesCluster(point: Point): Cluster {
+    private getNearestCluster(point: Point): Cluster {
         let assignedCluster = this.clusters[0];
 
         for (let i = 1; i < this.clusterCount; i++) {

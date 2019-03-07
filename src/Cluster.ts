@@ -38,11 +38,7 @@ export class Cluster {
         return this.points;
     }
 
-    public setRandomCenter(minX: number, minY: number, maxX: number, maxY: number): Point {
-        const x = (Math.random() * maxX) + minX;
-        const y = (Math.random() * maxY) + minY;
-        const center = {x: x, y: y};
-
+    public setRandomCenter(center: Point): Point {
         this.center = center;
         return center;
     }
