@@ -4,11 +4,11 @@ import { DistanceCalculator } from './DistanceCalculator';
 import { CenterCalculator } from './CenterCalculator';
 import { EuclidianDistanceCalculator } from './EuclidianDistanceCalculator';
 import { AverageCenterCalculator } from './AverageCenterCalculator';
-import { Thread } from '../Thread';
 
 export class KMeans {
     private points: Point[];
     private clusters: Cluster[];
+    private meanSquaredError: number;
     private distanceCalculator: DistanceCalculator;
     private centerCalculator: CenterCalculator;
     private clusterCount: number;
@@ -30,6 +30,10 @@ export class KMeans {
 
     public getClusters(): Cluster[] {
         return this.clusters;
+    }
+
+    public getMeanSquaredError(): number {
+        return this.meanSquaredError;
     }
 
     private generateStartingClusters(centers: Point[]) {
@@ -70,7 +74,7 @@ export class KMeans {
         this.centerCalculator = centerCalculator;
     }
 
-    public start(maxIterations: number): { clusters: Cluster[], iterations: number } {
+    public start(maxIterations: number): { clusters: Cluster[], iterations: number, meanSquaredError: number } {
         let centersHaveChanged = true;
         let iterations = 0;
 
@@ -80,10 +84,27 @@ export class KMeans {
             centersHaveChanged = this.centersHaveChanged();
         }
 
+        this.calculateMeanSquaredError();
+
         return {
             clusters: this.clusters,
-            iterations: iterations
+            iterations: iterations,
+            meanSquaredError: this.meanSquaredError
         };
+    }
+
+    private calculateMeanSquaredError() {
+        this.meanSquaredError = 0;
+
+        for (const cluster of this.clusters) {
+            for (const point of cluster.getPoints()) {
+                const center = cluster.getCenter();
+                const distance = this.distanceCalculator.calculate(point, center);
+                this.meanSquaredError += Math.pow(distance, 2);
+            }
+        }
+
+        this.meanSquaredError /= this.points.length;
     }
 
     private centersHaveChanged(): boolean {
