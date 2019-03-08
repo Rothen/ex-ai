@@ -4,8 +4,15 @@ import { DistanceCalculator } from './DistanceCalculator';
 import { CenterCalculator } from './CenterCalculator';
 import { EuclidianDistanceCalculator } from './EuclidianDistanceCalculator';
 import { AverageCenterCalculator } from './AverageCenterCalculator';
+import { Algorithm } from '../Algorithm';
 
-export class KMeans {
+interface KMeansResult {
+    clusters: Cluster[];
+    iterations: number;
+    meanSquaredError: number;
+}
+
+export class KMeans extends Algorithm<KMeansResult> {
     private points: Point[];
     private clusters: Cluster[];
     private meanSquaredError: number;
@@ -18,6 +25,7 @@ export class KMeans {
     private maxY: number;
 
     constructor(points: Point[] = [], clusterCount?: number, centers?: Point[]) {
+        super();
         this.points = points;
         this.clusters = [];
         this.clusterCount = clusterCount;
@@ -28,11 +36,11 @@ export class KMeans {
         this.generateStartingClusters(centers);
     }
 
-    public start(maxIterations: number): { clusters: Cluster[], iterations: number, meanSquaredError: number } {
+    public start(): KMeansResult {
         let centersHaveChanged = true;
         let iterations = 0;
 
-        while (iterations < maxIterations && centersHaveChanged) {
+        while (iterations < 100 && centersHaveChanged) {
             this.next();
             iterations++;
             centersHaveChanged = this.centersHaveChanged();

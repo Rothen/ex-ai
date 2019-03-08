@@ -22,7 +22,7 @@ describe('KMeans', () => {
             {x: 3.5, y: 4.5},
         ];
         const kMeans: KMeans = new KMeans(testPoints, 2, [{x: 1, y: 1}, {x: 5, y: 7}]);
-        const result = kMeans.start(20);
+        const result = kMeans.start();
         const clusters: Cluster[] = result.clusters;
 
         expect(result.iterations).to.be.within(1, 4);

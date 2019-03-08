@@ -2,7 +2,7 @@ import { Point } from '@alkocats/ex-math';
 import { KMeans } from './k-means/KMeans';
 import { KMeansExporter } from './KMeansExporter';
 import * as fs from 'fs';
-import { Rake } from './rake/Rake';
+import { RAKE } from './rake/RAKE';
 
 export * from './k-means/KMeans';
 export * from './Cluster';
@@ -10,7 +10,7 @@ export * from './Cluster';
 /*const testPoints: Point[] = JSON.parse(fs.readFileSync('./data2.json').toString());
 
 const kMeans: KMeans = new KMeans(testPoints, 4);
-const result = kMeans.start(10);
+const result = kMeans.start();
 const exporter = new KMeansExporter('test.m', kMeans);
 exporter.export();*/
 
@@ -22,6 +22,6 @@ const text = 'LDA stands for Latent Dirichlet Allocation. As already mentioned i
 const fileData = fs.readFileSync('stop_words_en.txt').toString().split('\n');
 const stopwordsList = [] || fileData;
 
-const instance = new Rake(text, stopwordsList);
-console.log(instance.generate());
+const rake = new RAKE(text, stopwordsList);
+// console.log(rake.start());
 

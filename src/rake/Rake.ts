@@ -1,15 +1,27 @@
-export class Rake {
+import { Algorithm } from '../Algorithm';
+
+interface RAKEResult {
+
+}
+
+export class RAKE extends Algorithm<RAKEResult> {
     private text: string;
+    private words: string[];
     private stopWords: string[];
     private regex: string;
+    private wordSplitRegex = new RegExp(/((\b[^\s]+\b)((?<=\.\w).)?)/g);
 
     constructor(text: string, stopWords: string[]) {
+        super();
         this.text = text;
+        this.words = this.text.match(this.wordSplitRegex);
+        console.log(this.text);
+        console.log(this.words);
         this.stopWords = stopWords;
         this.regex = this.buildRegex();
     }
 
-    public generate() {
+    public start() {
         const sentenceList = this.splitTextToSentences(this.text);
         const phrasesList = this.generatePhrases(sentenceList);
         const wordScores = this.calculateKeywordScores(phrasesList);
