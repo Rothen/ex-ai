@@ -1,0 +1,86 @@
+Keywords, which we define as a sequence of one or more words, provide a
+compact representation of a document’s content. Ideally, keywords represent in
+condensed form the essential content of a document. Keywords are widely used
+to define queries within information retrieval (IR) systems as they are easy to
+define, revise, remember, and share. In comparison to mathematical signatures,
+keywords are independent of any corpus and can be applied across multiple
+corpora and IR systems.
+Keywords have also been applied to improve the functionality of IR systems.
+Jones and Paynter (2002) describe Phrasier, a system that lists documents
+related to a primary document’s keywords, and that supports the use of keyword
+anchors as hyperlinks between documents, enabling a user to quickly access
+related material. Gutwin et al. (1999) describe Keyphind, which uses keywords
+from documents as the basic building block for an IR system. Keywords can also
+be used to enrich the presentation of search results. Hulth (2004) describes Keegle,
+a system that dynamically provides keyword extracts for web pages returned
+from a Google search. Andrade and Valencia (1998) present a system that automatically
+annotates protein function with keywords extracted from the scientific
+literature that are associated with a given protein.
+Despite their utility for analysis, indexing, and retrieval, most documents do
+not have assigned keywords. Most existing approaches focus on the manual
+assignment of keywords by professional curators who may use a fixed taxonomy,
+or rely on the authors’ judgment to provide a representative list. Research has
+therefore focused on methods to automatically extract keywords from documents
+as an aid either to suggest keywords for a professional indexer or to generate
+summary features for documents that would otherwise be inaccessible.
+Early approaches to automatically extract keywords focus on evaluating
+corpus-oriented statistics of individual words. Jones (1972) and Salton et al.
+(1975) describe positive results of selecting for an index vocabulary the
+statistically discriminating words across a corpus. Later keyword extraction
+research applies these metrics to select discriminating words as keywords for
+individual documents. For example, Andrade and Valencia (1998) base their
+approach on comparison of word frequency distributions within a text against
+distributions from a reference corpus.
+While some keywords are likely to be evaluated as statistically discriminating
+within the corpus, keywords that occur in many documents within the corpus are
+not likely to be selected as statistically discriminating. Corpus-oriented methods
+also typically operate only on single words. This further limits the measurement of
+statistically discriminating words because single words are often used in multiple
+and different contexts.
+To avoid these drawbacks, we focus our interest on methods of keyword
+extraction that operate on individual documents. Such document-oriented
+methods will extract the same keywords from a document regardless of the
+current state of a corpus. Document-oriented methods therefore provide contextindependent
+document features, enabling additional analytic methods such as
+those described in Engel et al. (2009) and Whitney et al. (2009) that characterize
+changes within a text stream over time. These document-oriented methods are
+suited to corpora that change, such as collections of published technical abstracts
+that grow over time or streams of news articles. Furthermore, by operating on a
+single document, these methods inherently scale to vast collections and can be
+applied in many contexts to enrich IR systems and analysis tools.
+Previous work on document-oriented methods of keyword extraction has combined
+natural language processing approaches to identify part-of-speech (POS)
+tags that are combined with supervised learning, machine-learning algorithms, or
+statistical methods.
+Hulth (2003) compares the effectiveness of three term selection approaches:
+noun-phrase (NP) chunks, n-grams, and POS tags, with four discriminative features
+of these terms as inputs for automatic keyword extraction using a supervised
+machine-learning algorithm.
+Mihalcea and Tarau (2004) describe a system that applies a series of syntactic
+filters to identify POS tags that are used to select words to evaluate as keywords.
+Co-occurrences of the selected words within a fixed-size sliding window are accumulated within a word co-occurrence graph. A graph-based ranking
+algorithm (TextRank) is applied to rank words based on their associations in
+the graph, and then top ranking words are selected as keywords. Keywords that
+are adjacent in the document are combined to form multi-word keywords. Mihalcea
+and Tarau (2004) report that TextRank achieves its best performance when
+only nouns and adjectives are selected as potential keywords.
+Matsuo and Ishizuka (2004) apply a chi-square measure to calculate how
+selectively words and phrases co-occur within the same sentences as a particular
+subset of frequent terms in the document text. The chi-square measure is applied
+to determine the bias of word co-occurrences in the document text which is
+then used to rank words and phrases as keywords of the document. Matsuo and
+Ishizuka (2004) state that the degree of biases is not reliable when term frequency
+is small. The authors present an evaluation on full text articles and a working
+example on a 27-page document, showing that their method operates effectively
+on large documents.
+In the following sections, we describe Rapid Automatic Keyword Extraction
+(RAKE), an unsupervised, domain-independent, and language-independent
+method for extracting keywords from individual documents. We provide details
+of the algorithm and its configuration parameters, and present results on a benchmark
+dataset of technical abstracts, showing that RAKE is more computationally
+efficient than TextRank while achieving higher precision and comparable recall
+scores. We then describe a novel method for generating stoplists, which we use to
+configure RAKE for specific domains and corpora. Finally, we apply RAKE to a
+corpus of news articles and define metrics for evaluating the exclusivity, essentiality,
+and generality of extracted keywords, enabling a system to identify keywords
+that are essential or general to documents in the absence of manual annotations.

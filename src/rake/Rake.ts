@@ -1,4 +1,5 @@
 import { Algorithm } from '../Algorithm';
+import { StoplistEN } from './stoplist_en';
 
 interface RAKEResult {
 
@@ -6,107 +7,108 @@ interface RAKEResult {
 
 export class RAKE extends Algorithm<RAKEResult> {
     private text: string;
-    private words: string[];
-    private stopWords: string[];
-    private regex: string;
-    private wordSplitRegex = new RegExp(/((\b[^\s]+\b)((?<=\.\w).)?)/g);
+    private terms: string[];
+    private stoplist: string[];
+    private regex: RegExp;
+    private termSplitRegex = new RegExp(/((\b[^\s]+\b)((?<=\.\w).)?)/g);
 
-    constructor(text: string, stopWords: string[]) {
+    private phrases: string[][];
+    private frequencyCache: {};
+    private degreeCache: {};
+    private termScoreCache: {};
+
+    constructor(text: string, stoplist: string[] = StoplistEN) {
         super();
         this.text = text;
-        this.words = this.text.match(this.wordSplitRegex);
-        console.log(this.text);
-        console.log(this.words);
-        this.stopWords = stopWords;
-        this.regex = this.buildRegex();
+        this.terms = this.text.match(this.termSplitRegex);
+        this.stoplist = stoplist;
+        this.buildRegExp();
     }
 
     public start() {
-        const sentenceList = this.splitTextToSentences(this.text);
-        const phrasesList = this.generatePhrases(sentenceList);
-        const wordScores = this.calculateKeywordScores(phrasesList);
-        const phraseScores = this.calculatePhraseScores(phrasesList, wordScores);
-        const result = this.sortPhrases(phraseScores);
+        this.buildRegExp();
+        this.generatePhrases();
+        this.calculateTermScore();
+
+        return this.calculatePhraseScore();
+    }
+
+    private calculatePhraseScore() {
+        const result = [];
+
+        for (const phrase of this.phrases) {
+            let score = 0;
+
+            for (const term of phrase) {
+                score += this.termScoreCache[term];
+            }
+
+            result.push({
+                phrase: phrase.join(' '),
+                score: score
+            });
+        }
+
+        result.sort((phraseA, phraseB) => {
+            if (phraseA.score < phraseB.score) {
+                return 1;
+            } else if (phraseA.score > phraseB.score) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
 
         return result;
     }
 
-    private buildRegex(): string {
-        return this.stopWords.join('|');
-    }
+    private calculateTermScore() {
+        this.termScoreCache = {};
 
-    private removeStopWords(sentence: string): string[] {
-        const regExp = this.regex;
-        const r = regExp.substring(0, regExp.length - 1);
-        const reg = new RegExp(`\\b(?:${r})\\b`, 'ig');
-        const filteredSentence = sentence.replace(reg, '|').split('|');
+        for (const term in this.degreeCache) {
+            if (this.degreeCache.hasOwnProperty(term)) {
+                const degree = this.degreeCache[term];
+                const frequency = this.frequencyCache[term];
 
-        return filteredSentence;
-    }
-
-    private splitTextToSentences(text: string): string[] {
-        const sentences = text.match(/[^.!?:\\]+/g);
-        const filteredSentences = sentences.filter(s => s.replace(/  +/g, '') !== '');
-
-        return filteredSentences;
-    }
-
-    private generatePhrases(sentenceList: string[]): string[] {
-        const reg = /['!"“”’#$%&()*+,\-./:;<=>?@[\\\]^_`{|}~']/g;
-        const phrases = sentenceList.map(s => this.removeStopWords(s));
-        const phraseList = phrases.map(phrase => phrase
-            .filter(phr => (phr.replace(reg, '') !== ' ' && phr.replace(reg, '') !== ''))
-            .map(phr => phr.trim())
-        );
-        const flattenedList = [].concat(...phraseList);
-
-        return flattenedList;
-    }
-
-    private calculateKeywordScores(phraseList: string[]): {} {
-        const wordFreq = {};
-        const wordDegree = {};
-        const wordScore = {};
-
-        phraseList.forEach((phrase) => {
-            const wordList = phrase.match(/[,.!?;:/‘’“”]|\b[0-9a-z']+\b/gi);
-
-            if (wordList) {
-                const wordListDegree = wordList.length;
-                wordList.forEach((word) => {
-                    if (wordFreq[word]) {
-                        wordFreq[word] += 1;
-                    } else {
-                        wordFreq[word] = 1;
-                    }
-
-                    if (wordDegree[word]) {
-                        wordDegree[word] += wordListDegree;
-                    } else {
-                        wordDegree[word] = wordListDegree;
-                    }
-                });
+                this.termScoreCache[term] = degree / frequency;
             }
-        });
-
-        Object.values(wordFreq).forEach((freq: string) => { wordDegree[freq] += wordFreq[freq]; });
-        Object.keys(wordFreq).forEach((i) => { wordScore[i] = wordDegree[i] / (wordFreq[i] * 1.0); });
-        return wordScore;
+        }
     }
 
-    private calculatePhraseScores(phraseList: string[], wordScore: {}): {} {
-        const phraseScores = {};
-        phraseList.forEach((phrase) => {
-            phraseScores[phrase] = 0;
-            let candidateScore = 0;
-            const wordList = phrase.match(/(\b[^\s]+\b)/g);
-            wordList.forEach((word) => { candidateScore += wordScore[word]; });
-            phraseScores[phrase] = candidateScore;
-        });
-        return phraseScores;
+    private buildRegExp() {
+        const stoplist = this.stoplist.map(value => `\\b(${value})\\b`);
+        this.regex = new RegExp(stoplist.join('|'), 'gi');
     }
 
-    private sortPhrases(obj: any): any {
-        return Object.keys(obj).sort((a, b) => obj[b] - obj[a]);
+    private generatePhrases() {
+        this.phrases = [];
+        this.frequencyCache = {};
+        this.degreeCache = {};
+        let phrase = [];
+
+        for (const term of this.terms) {
+            if (term.match(this.regex) !== null) {
+                if (phrase.length > 0) {
+                    this.phrases.push(phrase);
+                }
+
+                for (const phraseTerm of phrase) {
+                    if (!this.degreeCache.hasOwnProperty(phraseTerm)) {
+                        this.degreeCache[phraseTerm] = 0;
+                    }
+
+                    this.degreeCache[phraseTerm] += phrase.length;
+                }
+
+                phrase = [];
+            } else {
+                if (!this.frequencyCache.hasOwnProperty(term)) {
+                    this.frequencyCache[term] = 0;
+                }
+
+                this.frequencyCache[term]++;
+                phrase.push(term);
+            }
+        }
     }
 }
