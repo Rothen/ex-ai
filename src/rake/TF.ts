@@ -7,37 +7,41 @@ interface TFResult {
 
 export class TF extends Algorithm<TFResult> {
     private text: string;
+    private normalize: boolean;
     private terms: string[];
-    private termFrequeny: {};
+    private termFrequeny: Map<string, number>;
     private termSplitRegex = new RegExp(/((\b[^\s]+\b)((?<=\.\w).)?)/g);
 
-    constructor(text: string) {
+    constructor(text: string, normalize: boolean = false) {
         super();
         this.text = text;
         this.text = TextProcessing.sanitizeText(text);
         this.terms = TextProcessing.splitTextIntoTerms(this.text);
     }
 
-    public start(): TFResult {
+    public start(): Map<string, number> {
         this.calculateTermFrequency();
-        this.normalizeFrequency();
+        if (this.normalize) {
+            this.normalizeFrequency();
+        }
 
         return this.termFrequeny;
     }
 
-    public getTermFrequency(): {} {
+    public getTermFrequency(): Map<string, number> {
         return this.termFrequeny;
     }
 
     private calculateTermFrequency() {
-        this.termFrequeny = {};
+        this.termFrequeny = new Map<string, number>();
 
         for (const term of this.terms) {
-            if (!this.termFrequeny.hasOwnProperty(term)) {
-                this.termFrequeny[term] = 0;
+            if (!this.termFrequeny.has(term)) {
+                this.termFrequeny.set(term, 0);
             }
 
-            this.termFrequeny[term]++;
+
+            this.termFrequeny.set(term, this.termFrequeny.get(term) + 1);
         }
     }
 

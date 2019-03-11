@@ -1,84 +1,78 @@
 import { Algorithm } from '../Algorithm';
-import { TextProcessing } from './TextProcessing';
 import { TF } from './TF';
+import { CountVectorizer } from './CountVectorizer';
+import { TFIDFTransformer } from './TFIDFTransformer';
 
 interface TFIDFResult {
 
 }
 
+enum DecodeError {
+    Strict = 1,
+    Ignore,
+    Replace
+}
+
+enum StripAccents {
+    ASCII = 1,
+    Unicode
+}
+
+enum Analyzer {
+    Word = 1,
+    Char,
+    CharWB
+}
+
+enum StopWords {
+    EN = 1,
+    DE
+}
+
+enum Norm {
+    l1 = 1,
+    l2
+}
+
+class TFIDFOptions {
+    public encoding = 'utf-8';
+    public decodeError: DecodeError = DecodeError.Strict;
+    public stripAccents: StripAccents = null;
+    public lowercase = true;
+    public preprocessor: Function = null;
+    public tokenizer: Function = null;
+    public analyzer: Analyzer | Function;
+    public stopWords: StopWords | string[];
+    public tokenPattern: string;
+    public ngramRange: { min: number, max: number } = { min: -Infinity, max: Infinity };
+    public maxDf = 1;
+    public minDf = 1;
+    public maxFeatures: number = null;
+    public vocabulary = null;
+    public binary = false;
+    public dtype?;
+    public norm: Norm = null;
+    public useIDF = true;
+    public smoothIDF = true;
+    public sublinearTF = false;
+}
+
 export class TFIDF extends Algorithm<TFIDFResult> {
     private texts: string[];
-    private termFrequency = {};
-    private tfPerText: TF[];
-    private idf: {};
-    private tf_idf: {}[];
+    private options: TFIDFOptions;
+    private vectorizer: CountVectorizer;
+    private tfidftransfomer: TFIDFTransformer;
 
-    constructor(texts: string[]) {
+    constructor(texts: string[], options: TFIDFOptions = new TFIDFOptions()) {
         super();
         this.texts = texts;
+        this.options = options;
+        this.vectorizer = new CountVectorizer(this.texts);
+        this.tfidftransfomer = new TFIDFTransformer(this.vectorizer);
     }
 
-    public start(): TFIDFResult {
-        this.splitup();
-        this.calculateIDF();
-        this.calculateTFIDF();
-
-        return this.tf_idf;
-    }
-
-    private calculateTFIDF() {
-        this.tf_idf = [];
-
-        for (let i = 0; i < this.texts.length; i++) {
-            this.tf_idf[i] = {};
-            const tf = this.tfPerText[i];
-            const frequency = tf.getTermFrequency();
-
-            for (const term in frequency) {
-                if (!frequency.hasOwnProperty(term)) {
-                    continue;
-                }
-
-                this.tf_idf[i][term] = frequency[term] * this.idf[term];
-            }
-        }
-    }
-
-    private calculateIDF() {
-        this.idf = {};
-
-        for (const term in this.termFrequency) {
-            if (!this.termFrequency.hasOwnProperty(term)) {
-                continue;
-            }
-
-            this.idf[term] = Math.log(this.texts.length / this.termFrequency[term]);
-        }
-    }
-
-    private splitup() {
-        this.termFrequency = {};
-        this.tfPerText = [];
-
-        for (let i = 0; i < this.texts.length; i++) {
-            const text = this.texts[i];
-            const tf = new TF(text);
-
-            this.tfPerText[i] = tf;
-            tf.start();
-            const termFrequency = tf.getTermFrequency();
-
-            for (const term in termFrequency) {
-                if (!termFrequency.hasOwnProperty(term)) {
-                    continue;
-                }
-
-                if (!this.termFrequency.hasOwnProperty(term)) {
-                    this.termFrequency[term] = 0;
-                }
-
-                this.termFrequency[term] ++;
-            }
-        }
+    public start(): Map<string, number>[] {
+        this.vectorizer.start();
+        return this.tfidftransfomer.start();
     }
 }

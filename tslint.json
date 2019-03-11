@@ -1,5 +1,6 @@
 {
     "rules": {
+        "downlevelIteration": true,
         "class-name": true,
         "comment-format": [
             true,
