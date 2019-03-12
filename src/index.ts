@@ -1,85 +1,118 @@
-import { Point } from '@alkocats/ex-math';
-import { KMeans } from './k-means/KMeans';
-import { KMeansExporter } from './KMeansExporter';
 import * as fs from 'fs';
-import { RAKE } from './rake/RAKE';
-import { TF } from './rake/TF';
-import { TFIDF } from './rake/TF_IDF';
-import { CountVectorizer } from './rake/CountVectorizer';
-import { TFIDFTransformer } from './rake/TFIDFTransformer';
+import { TFIDF } from './tf_idf/TF_IDF';
+import * as Plotly from 'plotly';
+import * as TPlotly from 'plotly.js';
+import { ExMath } from '@alkocats/ex-math';
+import { KMeans } from './k-means/KMeans';
+import { JSONParser } from './JSONParser';
+import { Vector } from './type/Vector';
+import { KMeansExporter } from './KMeansExporter';
 
 export * from './k-means/KMeans';
 export * from './Cluster';
 
-/*const testPoints: Point[] = JSON.parse(fs.readFileSync('./data2.json').toString());
+/*const training_data_set: Vector[] = JSON.parse(fs.readFileSync('training_data_set.json').toString());
+const kMeanstraining_data_set = new KMeans(training_data_set, 20);
+const exportertraining_data_set = new KMeansExporter('training_data_set.m', kMeanstraining_data_set);
+kMeanstraining_data_set.start();
+exportertraining_data_set.export();
 
-const kMeans: KMeans = new KMeans(testPoints, 4);
+const data: Vector[] = JSON.parse(fs.readFileSync('data.json').toString());
+const kMeansdata = new KMeans(data, 15);
+const exporterdata = new KMeansExporter('data.m', kMeansdata);
+kMeansdata.start();
+exporterdata.export();
+
+const data2: Vector[] = JSON.parse(fs.readFileSync('data2.json').toString());
+const kMeansdata2 = new KMeans(data2, 4);
+const exporterdata2 = new KMeansExporter('data2.m', kMeansdata2);
+kMeansdata2.start();
+exporterdata2.export();*/
+
+/**/
+
+
+/*const data = [
+    'Das rote Auto hält an der roten Ampel.',
+    'Das grüne Auto hält an der grünen Ampel.'
+];
+
+const tf_idf = new TFIDF(data);
+const tfIdfResult = tf_idf.start();
+console.log(`Getting matrix`);
+const fitted_matrix = tf_idf.getVectorizedResult();
+tf_idf.printMostImportant();
+console.log(fitted_matrix);
+
+/**/
+
+console.log(`Parsing genres`);
+const artist_to_genre = JSONParser.toMap('artist_to_genre.json');
+console.log(`Parsing lyrics`);
+const lyrics = JSONParser.toArray('artist_lyrics.json');
+
+const artists = [];
+const genres = [];
+
+const yGenreIndizes = [];
+const yGenres = [];
+
+
+for (const artist of artist_to_genre.keys()) {
+    artists.push(artist);
+    if (genres.indexOf(artist_to_genre.get(artist)) === -1) {
+        genres.push(artist_to_genre.get(artist));
+    }
+}
+
+console.log(`Starting TF-IDF`);
+const tf_idf = new TFIDF(lyrics);
+const tfIdfResult = tf_idf.start();
+console.log(`Getting matrix`);
+const fitted_matrix = tf_idf.getVectorizedResult();
+console.log(fitted_matrix[0]);
+
+console.log(`Fitting with K-Means`);
+const kMeans = new KMeans(fitted_matrix, 10);
 const result = kMeans.start();
-const exporter = new KMeansExporter('test.m', kMeans);
-exporter.export();*/
+console.log(`${result.iterations} iterations needed`);
+const predictedGenreIndizes = kMeans.predict(fitted_matrix);
+const correctGenreIndizes = [];
 
-
-/*// tslint:disable-next-line: max-line-length
-const text = 'LDA stands for Latent Dirichlet Allocation. As already mentioned it is one of the more popular topic models which was initially proposed by Blei, Ng and Jordan in 2003. It is a generative model which, according to Wikipedia, allows sets of observations to be explained by unobserved groups that explain why some parts of the data are similar.';
-
-const rake = new RAKE(fs.readFileSync('text.txt').toString());
-// console.log(rake.start());
-
-const tf = new TF(fs.readFileSync('text.txt').toString());
-tf.start();
-// console.log(rake.start());*/
-
-const artist_data = JSON.parse(fs.readFileSync('artist_data.json').toString());
-let texts = [];
-
-for (const key in artist_data) {
-    if (artist_data.hasOwnProperty(key)) {
-        texts.push(artist_data[key]);
-    }
+for (const artist of artist_to_genre.keys()) {
+    correctGenreIndizes.push(genres.indexOf(artist_to_genre.get(artist)));
 }
 
-/*const texts = [
-    'This is the first document.',
-    'This document is the second document.',
-    'And this is the third one.',
-    'Is this the first document?',
-];*/
-
-const tf_idf = new TFIDF(texts);
-const result = tf_idf.start();
-
-const highestes = [];
-
-
-for (const textMap of result) {
-    const highest = [];
-
-    for (const key of textMap.keys()) {
-        highest.push({
-            term: key,
-            weight: textMap.get(key)
-        });
-
-        let smallest = {
-            term: '',
-            weight: Infinity
-        };
-
-        if (highest.length > 10) {
-            for (const existingTerm of highest) {
-                if (existingTerm.weight < smallest.weight) {
-                    smallest = existingTerm;
-                }
-            }
-            let index = highest.indexOf(smallest);
-
-            if (index >= 0) {
-                highest.splice(index, 1);
-            }
-        }
-    }
-
-    highestes.push(highest);
+for (let i = 0; i < predictedGenreIndizes.length; i++) {
+    yGenres[predictedGenreIndizes[i]] = yGenreIndizes[i];
 }
 
-console.log(highestes[0]);
+const plotly = Plotly('DarkSephiroth', 'B1y6jFXsprLx9sjLadsg');
+const data: Plotly.PlotData[] = [{
+    x: artists,
+    y: correctGenreIndizes,
+    type: 'scatter',
+    mode: 'markers',
+    name: 'correct',
+    text: yGenres
+}, {
+    x: artists,
+    y: predictedGenreIndizes,
+    type: 'scatter',
+    mode: 'markers',
+    name: 'predicted',
+    text: yGenres
+}];
+
+const layout = { title: 'Hover over the points to see the text' };
+const graphOptions = { layout: layout, filename: 'hover-chart-basic', fileopt: 'overwrite' };
+
+plotly.plot(data, graphOptions, (err: string, msg: string) => {
+    if (err) {
+        return console.log(err);
+    }
+
+    console.log(msg);
+});
+
+/**/

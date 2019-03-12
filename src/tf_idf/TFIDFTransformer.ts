@@ -17,6 +17,10 @@ export class TFIDFTransformer {
         return this.tf_idf;
     }
 
+    public getTfIdf(): Map<string, number>[] {
+        return this.tf_idf;
+    }
+
     private calculateTFIDF() {
         this.tf_idf = [];
 
@@ -36,7 +40,7 @@ export class TFIDFTransformer {
         this.idf = new Map<string, number>(this.countVectorizer.getTerms());
 
         for (const term of this.idf.keys()) {
-            this.idf.set(term, Math.log((this.countVectorizer.getRowCount() + 1) / (1 + this.idf.get(term))) + 1);
+            this.idf.set(term, Math.log((this.countVectorizer.getRowCount()) / ( this.idf.get(term))));
         }
     }
 }

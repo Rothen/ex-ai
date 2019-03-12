@@ -1,7 +1,6 @@
-import { TF } from "./TF";
-import { TextProcessing } from "./TextProcessing";
-import { stringify } from "querystring";
-import { ENGINE_METHOD_PKEY_ASN1_METHS } from "constants";
+import { TF } from './TF';
+import { TextProcessing } from '../rake/TextProcessing';
+import { Matrix } from '../type/Matrix';
 
 export class CountVectorizer {
     private texts: string[];
@@ -25,7 +24,7 @@ export class CountVectorizer {
         return this.termFrequencies[i];
     }
 
-    public start(): number[][] {
+    public start(): Matrix {
         this.splitup();
 
         return this.transform();
@@ -41,8 +40,8 @@ export class CountVectorizer {
         return result;
     }
 
-    private transform(): number[][] {
-        let result: number[][] = [];
+    private transform(): Matrix {
+        let result: Matrix = [];
 
         for (let i = 0; i < this.termFrequencies.length; i++) {
             const frequency = this.termFrequencies[i];

@@ -1,5 +1,5 @@
 import { Algorithm } from '../Algorithm';
-import { TextProcessing } from './TextProcessing';
+import { TextProcessing } from '../rake/TextProcessing';
 
 interface TFResult {
 
@@ -12,7 +12,7 @@ export class TF extends Algorithm<TFResult> {
     private termFrequeny: Map<string, number>;
     private termSplitRegex = new RegExp(/((\b[^\s]+\b)((?<=\.\w).)?)/g);
 
-    constructor(text: string, normalize: boolean = false) {
+    constructor(text: string, normalize: boolean = true) {
         super();
         this.text = text;
         this.text = TextProcessing.sanitizeText(text);

@@ -1,10 +1,11 @@
 import { Cluster } from '../Cluster';
-import { Point } from '@alkocats/ex-math';
-import { DistanceCalculator } from './DistanceCalculator';
-import { CenterCalculator } from './CenterCalculator';
-import { EuclidianDistanceCalculator } from './EuclidianDistanceCalculator';
-import { AverageCenterCalculator } from './AverageCenterCalculator';
+import { DistanceCalculator } from '../calculator/distance_calculator/DistanceCalculator';
+import { CentroidCalculator } from '../calculator/centroid_calculator/CentroidCalculator';
+import { EuclidianDistanceCalculator } from '../calculator/distance_calculator/EuclidianDistanceCalculator';
+import { AverageCentroidCalculator } from '../calculator/centroid_calculator/AverageCentroidCalculator';
 import { Algorithm } from '../Algorithm';
+import { Vector } from '../type/Vector';
+import { Matrix } from '../type/Matrix';
 
 interface KMeansResult {
     clusters: Cluster[];
@@ -13,37 +14,33 @@ interface KMeansResult {
 }
 
 export class KMeans extends Algorithm<KMeansResult> {
-    private points: Point[];
+    private vectors: Vector[] | Matrix;
     private clusters: Cluster[];
     private meanSquaredError: number;
     private distanceCalculator: DistanceCalculator;
-    private centerCalculator: CenterCalculator;
+    private centroidCalculator: CentroidCalculator;
     private clusterCount: number;
-    private minX: number;
-    private minY: number;
-    private maxX: number;
-    private maxY: number;
+    public maxIterations = 100;
 
-    constructor(points: Point[] = [], clusterCount?: number, centers?: Point[]) {
+    constructor(vectors: Vector[] | Matrix = [], clusterCount?: number, centroids?: Vector[]) {
         super();
-        this.points = points;
+        this.vectors = vectors;
         this.clusters = [];
         this.clusterCount = clusterCount;
 
-        this.calculateBoundaries();
         this.setDistanceCalculator(new EuclidianDistanceCalculator());
-        this.setCenterCalculator(new AverageCenterCalculator());
-        this.generateStartingClusters(centers);
+        this.setCentroidCalculator(new AverageCentroidCalculator());
+        this.kMeansPlusPlus();
     }
 
     public start(): KMeansResult {
-        let centersHaveChanged = true;
+        let centroidsHaveChanged = true;
         let iterations = 0;
 
-        while (iterations < 100 && centersHaveChanged) {
+        while (iterations < this.maxIterations && centroidsHaveChanged) {
             this.next();
             iterations++;
-            centersHaveChanged = this.centersHaveChanged();
+            centroidsHaveChanged = this.centroidsHaveChanged();
         }
 
         this.calculateMeanSquaredError();
@@ -59,8 +56,8 @@ export class KMeans extends Algorithm<KMeansResult> {
         this.distanceCalculator = distancecalculator;
     }
 
-    public setCenterCalculator(centerCalculator: CenterCalculator) {
-        this.centerCalculator = centerCalculator;
+    public setCentroidCalculator(centroidCalculator: CentroidCalculator) {
+        this.centroidCalculator = centroidCalculator;
     }
 
     public getClusters(): Cluster[] {
@@ -71,34 +68,60 @@ export class KMeans extends Algorithm<KMeansResult> {
         return this.meanSquaredError;
     }
 
-    private generateStartingClusters(centers: Point[]) {
-        if (centers) {
-            if (centers.length !== this.clusterCount) {
-                throw new Error('Number of centers must equal k');
+    private generateStartingClusters(centroids: Vector[]) {
+        if (centroids) {
+            if (centroids.length !== this.clusterCount) {
+                throw new Error('Number of centroids must equal k');
             }
 
-            this.generateStartingClustersByGivenCenters(centers);
+            this.generateStartingClustersByGivenCentroids(centroids);
         } else {
-            this.generateStartingClustersByRandomCenters();
+            this.generateStartingClustersByRandomCentroids();
         }
     }
 
-    private generateStartingClustersByGivenCenters(centers: Point[]) {
+    private kMeansPlusPlus() {
+        let mean = this.vectors[Math.round(Math.random() * this.vectors.length - 1)];
+        let newCluster = new Cluster();
+        newCluster.setCentroid(mean);
+        this.clusters.push(newCluster);
+
+        for (let i = 1; i < this.clusterCount; i++) {
+            let res;
+            let high = -Infinity;
+
+            for (const vector of this.vectors) {
+                const nearest = this.getNearestCluster(vector);
+                let dist = this.distanceCalculator.calculate(vector, nearest.getCentroid());
+
+                if (dist > high) {
+                    res = vector;
+                    high = dist;
+                }
+            }
+
+            newCluster = new Cluster();
+            newCluster.setCentroid(res);
+            this.clusters.push(newCluster);
+        }
+    }
+
+    private generateStartingClustersByGivenCentroids(centroids: Vector[]) {
         for (let i = 0; i < this.clusterCount; i++) {
             const cluster = new Cluster();
 
-            cluster.setCenter(centers[i]);
+            cluster.setCentroid(centroids[i]);
             this.clusters.push(cluster);
         }
     }
 
-    private generateStartingClustersByRandomCenters() {
+    private generateStartingClustersByRandomCentroids() {
         for (let i = 0; i < this.clusterCount; i++) {
             const cluster = new Cluster();
-            const index = Math.round(Math.random() * this.points.length - 1);
-            const center = this.points[index];
+            const index = Math.round(Math.random() * this.vectors.length - 1);
+            const centroid = this.vectors[index];
 
-            cluster.setRandomCenter({ x: center.x, y: center.y });
+            cluster.setRandomCentroid(centroid);
             this.clusters.push(cluster);
         }
     }
@@ -107,24 +130,24 @@ export class KMeans extends Algorithm<KMeansResult> {
         this.meanSquaredError = 0;
 
         for (const cluster of this.clusters) {
-            for (const point of cluster.getPoints()) {
-                const center = cluster.getCenter();
-                const distance = this.distanceCalculator.calculate(point, center);
-                this.meanSquaredError += Math.pow(distance, 2);
+            for (const vector of cluster.getVectors()) {
+                const centroid = cluster.getCentroid();
+                const distance = this.distanceCalculator.calculate(vector, centroid);
+                this.meanSquaredError += distance;
             }
         }
 
-        this.meanSquaredError /= this.points.length;
+        this.meanSquaredError /= this.vectors.length;
     }
 
-    private centersHaveChanged(): boolean {
-        let centersHaveChanged = false;
+    private centroidsHaveChanged(): boolean {
+        let centroidsHaveChanged = false;
 
         for (const cluster of this.clusters) {
-            centersHaveChanged = centersHaveChanged || cluster.centerHasChanged();
+            centroidsHaveChanged = centroidsHaveChanged || cluster.centroidHasChanged();
         }
 
-        return centersHaveChanged;
+        return centroidsHaveChanged;
     }
 
     private next(): void {
@@ -132,44 +155,41 @@ export class KMeans extends Algorithm<KMeansResult> {
             cluster.reset();
         }
 
-        for (const point of this.points) {
-            const nearestCluster = this.getNearestCluster(point);
-            nearestCluster.addPoint(point);
+        for (const vector of this.vectors) {
+            const nearestCluster = this.getNearestCluster(vector);
+            nearestCluster.addVector(vector);
         }
 
         for (const cluster of this.clusters) {
-            const newCenter = this.centerCalculator.calculate(cluster.getPoints());
-            cluster.setCenter(newCenter);
+            const newCentroid = this.centroidCalculator.calculate(cluster.getVectors());
+            cluster.setCentroid(newCentroid);
         }
     }
 
-    private getNearestCluster(point: Point): Cluster {
-        let assignedCluster = this.clusters[0];
+    private getNearestCluster(vector: Vector): Cluster {
+        let currentCluster = this.clusters[0];
 
-        for (let i = 1; i < this.clusterCount; i++) {
+        for (let i = 1; i < this.clusters.length; i++) {
             const cluster = this.clusters[i];
-            const newDistance = this.distanceCalculator.calculate(point, cluster.getCenter());
-            const currentDistance = this.distanceCalculator.calculate(point, assignedCluster.getCenter());
+            const newDistance = this.distanceCalculator.calculate(vector, cluster.getCentroid());
+            const currentDistance = this.distanceCalculator.calculate(vector, currentCluster.getCentroid());
 
             if (newDistance <= currentDistance) {
-                assignedCluster = cluster;
+                currentCluster = cluster;
             }
         }
 
-        return assignedCluster;
+        return currentCluster;
     }
 
-    private calculateBoundaries() {
-        this.minX = Infinity;
-        this.minY = Infinity;
-        this.maxX = -Infinity;
-        this.maxY = -Infinity;
+    public predict(vectors: Vector[] | Matrix): number[] {
+        let result: number[] = [];
 
-        for (const point of this.points) {
-            this.minX = Math.min(this.minX, point.x);
-            this.minY = Math.min(this.minY, point.y);
-            this.maxX = Math.max(this.maxX, point.x);
-            this.maxY = Math.max(this.maxY, point.y);
+        for (const vector of vectors) {
+            const nearestCluster = this.getNearestCluster(vector);
+            result.push(this.clusters.indexOf(nearestCluster));
         }
+
+        return result;
     }
 }

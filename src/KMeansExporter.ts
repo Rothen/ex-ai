@@ -18,13 +18,13 @@ export class KMeansExporter {
         for (let i = 0; i < clusters.length; i++) {
             const cluster = clusters[i];
 
-            let clusterStr = `c_x${i} = ${cluster.getCenter().x};\nc_y${i} = ${cluster.getCenter().y};\n`;
+            let clusterStr = `c_x${i} = ${cluster.getCentroid()[0]};\nc_y${i} = ${cluster.getCentroid()[1]};\n`;
             let clusterPointsXStr = `x${i} = [`;
             let clusterPointsYStr = `y${i} = [`;
 
-            for (const point of cluster.getPoints()) {
-                clusterPointsXStr += `${point.x} `;
-                clusterPointsYStr += `${point.y} `;
+            for (const point of cluster.getVectors()) {
+                clusterPointsXStr += `${point[0]} `;
+                clusterPointsYStr += `${point[1]} `;
             }
 
             clusterStr += `${clusterPointsXStr}];\n`;

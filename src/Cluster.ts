@@ -1,62 +1,58 @@
-import { ExMath, Point } from '@alkocats/ex-math';
+import { Vector } from './type/Vector';
 
 export class Cluster {
-    private points: Point[];
-    private lastCenter: Point;
-    private center: Point;
+    private vectors: Vector[];
+    private lastCentroid: Vector;
+    private centroid: Vector;
 
     constructor() {
-        this.points = [];
+        this.vectors = [];
     }
 
-    public addPoint(point: Point): void {
-        this.points.push(point);
+    public addVector(vector: Vector): void {
+        this.vectors.push(vector);
     }
 
-    public removePoint(point: Point): Point {
-        const index = this.points.indexOf(point);
-        let pointToRemove: Point = null;
+    public removeVector(vector: Vector): Vector {
+        const index = this.vectors.indexOf(vector);
+        let vectorToRemove: Vector = null;
 
         if (index > -1) {
-            pointToRemove = this.points[index];
-            this.points.splice(index, 1);
+            vectorToRemove = this.vectors[index];
+            this.vectors.splice(index, 1);
         }
 
-        return pointToRemove;
+        return vectorToRemove;
     }
 
-    public setCenter(center: Point): void {
-        this.lastCenter = this.center;
-        this.center = center;
+    public setCentroid(centroid: Vector): void {
+        this.lastCentroid = this.centroid;
+        this.centroid = centroid;
     }
 
-    public getCenter(): Point {
-        return this.center;
+    public getCentroid(): Vector {
+        return this.centroid;
     }
 
-    public getPoints(): Point[] {
-        return this.points;
+    public getVectors(): Vector[] {
+        return this.vectors;
     }
 
-    public setRandomCenter(center: Point): Point {
-        this.center = center;
-        return center;
+    public setRandomCentroid(centroid: Vector): Vector {
+        this.centroid = centroid;
+        return centroid;
     }
 
     public reset() {
-        this.points = [];
+        this.vectors = [];
     }
 
-    public recalculateCenter(): Point {
-        let average = ExMath.average(this.points, ['x', 'y']) as {x: number, y: number};
-
-        this.lastCenter = this.center;
-        this.center = {x: average.x, y: average.y};
-
-        return this.center;
-    }
-
-    public centerHasChanged(): boolean {
-        return this.center.x !== this.lastCenter.x || this.center.y !== this.lastCenter.y;
+    public centroidHasChanged(): boolean {
+        for (let i = 0; i < this.centroid.length; i++) {
+            if (this.centroid[i] !== this.lastCentroid[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 }

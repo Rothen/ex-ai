@@ -6,7 +6,10 @@
   "types": "build/index.d.ts",
   "dependencies": {
     "@alkocats/ex-math": "0.0.6",
-    "node-cmd": "^3.0.0"
+    "node-cmd": "^3.0.0",
+    "node-kmeans": "^1.1.8",
+    "node-tfidf": "0.0.2",
+    "plotly": "^1.0.6"
   },
   "repository": {
     "type": "git",
@@ -16,6 +19,7 @@
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.6",
     "@types/node": "^10.12.21",
+    "@types/plotly.js": "^1.44.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.2",
     "mocha": "^6.0.0",
