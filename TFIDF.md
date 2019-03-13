@@ -1,8 +1,6 @@
 # TFIDF
 
-$$
-\text{tf}(t, d) = \text{How often the term }t\text{ occures in the document }d
-$$
+$ \text{tf}(t, d) = \text{How often the term }t\text{ occures in the document }d $
 
 $$
 \text{df}(t) = \text{How many documents contain the term }t\text{ at least once}
