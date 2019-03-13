@@ -11,7 +11,7 @@ import { PCA } from './pca/PCA';
 export * from './k-means/KMeans';
 export * from './Cluster';
 
-const data = [[40, 50, 60], [50, 70, 60], [80, 70, 90], [50, 60, 80]];
+/*const data = [[40, 50, 60], [50, 70, 60], [80, 70, 90], [50, 60, 80]];
 const pca = new PCA(data);
 const vectors = pca.start();
 console.log(vectors);
@@ -19,7 +19,7 @@ console.log(pca.analyseTopResult());
 
 /**/
 
-/*console.log(`Parsing genres`);
+console.log(`Parsing genres`);
 const artist_to_genre = JSONParser.toMap('artist_to_genre.json');
 console.log(`Parsing lyrics`);
 const lyrics = JSONParser.toArray('artist_lyrics.json');
@@ -44,6 +44,11 @@ const tfIdfResult = tf_idf.start();
 console.log(`Getting matrix`);
 const fitted_matrix = tf_idf.getVectorizedResult();
 tf_idf.printMostImportant(1);
+
+const pca = new PCA(fitted_matrix);
+const vectors = pca.start();
+console.log(vectors);
+// console.log(pca.analyseTopResult());
 
 console.log(`Fitting with K-Means`);
 const kMeans = new KMeans(fitted_matrix, 10);
