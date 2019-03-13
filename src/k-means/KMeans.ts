@@ -13,7 +13,7 @@ interface KMeansResult {
     meanSquaredError: number;
 }
 
-export class KMeans extends Algorithm<KMeansResult> {
+export class KMeans implements Algorithm<KMeansResult> {
     private vectors: Vector[] | Matrix;
     private clusters: Cluster[];
     private meanSquaredError: number;
@@ -23,7 +23,6 @@ export class KMeans extends Algorithm<KMeansResult> {
     public maxIterations = 100;
 
     constructor(vectors: Vector[] | Matrix = [], clusterCount?: number, centroids?: Vector[]) {
-        super();
         this.vectors = vectors;
         this.clusters = [];
         this.clusterCount = clusterCount;

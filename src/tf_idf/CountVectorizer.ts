@@ -1,19 +1,35 @@
 import { TF } from './TF';
 import { TextProcessing } from '../rake/TextProcessing';
 import { Matrix } from '../type/Matrix';
+import { StoplistEN } from '../rake/stoplist_en';
 
 export class CountVectorizer {
     private texts: string[];
     private terms: Map<string, number>;
+    private documentFrequency: Map<string, number>;
     private termFrequencies: Map<string, number>[];
+    private stoplist: string[];
+    private regex: RegExp;
+    private tfs: TF[];
+    private maxDofcumentFrequency = 0.5;
 
-    constructor(texts: string[]) {
+    constructor(texts: string[], stoplist: string[] = StoplistEN) {
         this.texts = texts;
-        // this.options = options;
+        this.stoplist = stoplist;
+        this.buildRegExp();
+    }
+
+    private buildRegExp() {
+        const stoplist = this.stoplist.map(value => `\\b(${value})\\b`);
+        this.regex = new RegExp(stoplist.join('|'), 'gi');
     }
 
     public getTerms(): Map<string, number> {
         return this.terms;
+    }
+
+    public getDocumentFrequency(): Map<string, number> {
+        return this.documentFrequency;
     }
 
     public getRowCount(): number {
@@ -24,10 +40,14 @@ export class CountVectorizer {
         return this.termFrequencies[i];
     }
 
-    public start(): Matrix {
-        this.splitup();
+    public getTF(i: number): TF {
+        return this.tfs[i];
+    }
 
-        return this.transform();
+    public start(): Matrix {
+        this.fit();
+        const matrix = this.transform();
+        return matrix;
     }
 
     public getFeatureNames(): string[] {
@@ -44,10 +64,10 @@ export class CountVectorizer {
         let result: Matrix = [];
 
         for (let i = 0; i < this.termFrequencies.length; i++) {
-            const frequency = this.termFrequencies[i];
+            const termFrequency = this.termFrequencies[i];
             result[i] = [];
 
-            for (const value of frequency.values()) {
+            for (const value of termFrequency.values()) {
                 result[i].push(value);
             }
         }
@@ -55,14 +75,24 @@ export class CountVectorizer {
         return result;
     }
 
-    private splitup() {
+    private fit() {
         this.terms = new Map<string, number>();
+        this.documentFrequency = new Map<string, number>();
         this.termFrequencies = [];
+        this.tfs = [];
 
         for (let i = 0; i < this.texts.length; i++) {
             const terms = TextProcessing.splitTextIntoTerms(TextProcessing.sanitizeText(this.texts[i]));
 
             for (const term of terms) {
+                if (term.match(this.regex) !== null) {
+                    continue;
+                }
+
+                if (term.match(RegExp(/\b\w\w+\b/)) == null) {
+                    continue;
+                }
+
                 if (!this.terms.has(term)) {
                     this.terms.set(term, 0);
                 }
@@ -79,14 +109,28 @@ export class CountVectorizer {
                 map.set(key, 0);
             }
 
-            const tf = new TF(text);
+            const tf = new TF(text, this.stoplist);
+            this.tfs.push(tf);
             const frequency = tf.start();
 
             for (const term of frequency.keys()) {
                 map.set(term, frequency.get(term));
+                if (!this.documentFrequency.has(term)) {
+                    this.documentFrequency.set(term, 0);
+                }
+                this.documentFrequency.set(term, this.documentFrequency.get(term) + 1);
             }
 
             this.termFrequencies.push(map);
+        }
+
+        for (const term of this.documentFrequency.keys()) {
+            if (this.documentFrequency.get(term) / this.getRowCount() > this.maxDofcumentFrequency) {
+                this.documentFrequency.delete(term);
+                for (const termFrequency of  this.termFrequencies) {
+                    termFrequency.delete(term);
+                }
+            }
         }
     }
 }

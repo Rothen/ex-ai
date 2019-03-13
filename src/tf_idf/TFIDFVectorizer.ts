@@ -1,5 +1,4 @@
 import { Algorithm } from '../Algorithm';
-import { TF } from './TF';
 import { CountVectorizer } from './CountVectorizer';
 import { TFIDFTransformer } from './TFIDFTransformer';
 import { Matrix } from '../type/Matrix';
@@ -35,37 +34,36 @@ enum Norm {
     l2
 }
 
-class TFIDFOptions {
-    public encoding = 'utf-8';
-    public decodeError: DecodeError = DecodeError.Strict;
-    public stripAccents: StripAccents = null;
-    public lowercase = true;
-    public preprocessor: Function = null;
-    public tokenizer: Function = null;
-    public analyzer: Analyzer | Function;
-    public stopWords: StopWords | string[];
-    public tokenPattern: string;
-    public ngramRange: { min: number, max: number } = { min: -Infinity, max: Infinity };
-    public maxDf = 1;
-    public minDf = 1;
-    public maxFeatures: number = null;
-    public vocabulary = null;
-    public binary = false;
-    public dtype?;
-    public norm: Norm = null;
-    public useIDF = true;
-    public smoothIDF = true;
-    public sublinearTF = false;
+abstract class TFIDFOptions {
+    static encoding = 'utf-8';
+    static decodeError: DecodeError = DecodeError.Strict;
+    static stripAccents: StripAccents = null;
+    static lowercase = true;
+    static preprocessor: Function = null;
+    static tokenizer: Function = null;
+    static analyzer: Analyzer | Function;
+    static stopWords: StopWords | string[];
+    static tokenPattern: string;
+    static ngramRange: { min: number, max: number } = { min: -Infinity, max: Infinity };
+    static maxDf = 1;
+    static minDf = 1;
+    static maxFeatures: number = null;
+    static vocabulary = null;
+    static binary = false;
+    static dtype = null;
+    static norm: Norm = null;
+    static useIDF = true;
+    static smoothIDF = true;
+    static sublinearTF = false;
 }
 
-export class TFIDF extends Algorithm<TFIDFResult> {
+export class TFIDFVectorizer implements Algorithm<TFIDFResult> {
     private texts: string[];
     private options: TFIDFOptions;
     private vectorizer: CountVectorizer;
     private tfidftransfomer: TFIDFTransformer;
 
-    constructor(texts: string[], options: TFIDFOptions = new TFIDFOptions()) {
-        super();
+    constructor(texts: string[], options: TFIDFOptions = TFIDFOptions) {
         this.texts = texts;
         this.options = options;
         this.vectorizer = new CountVectorizer(this.texts);
@@ -115,7 +113,7 @@ export class TFIDF extends Algorithm<TFIDFResult> {
         return result;
     }
 
-    public printMostImportant() {
+    public printMostImportant(n: number = 10) {
         let idf = this.tfidftransfomer.getTfIdf();
 
         for (const res of idf) {
@@ -127,7 +125,7 @@ export class TFIDF extends Algorithm<TFIDFResult> {
                     weight: res.get(key)
                 });
 
-                if (highest.length > 10) {
+                if (highest.length > n) {
                     let smallest = {
                         term: '',
                         weight: Infinity

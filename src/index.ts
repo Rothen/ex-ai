@@ -1,52 +1,17 @@
-import * as fs from 'fs';
-import { TFIDF } from './tf_idf/TF_IDF';
+import { TFIDFVectorizer } from './tf_idf/TFIDFVectorizer';
 import * as Plotly from 'plotly';
-import * as TPlotly from 'plotly.js';
-import { ExMath } from '@alkocats/ex-math';
+import * as fs from 'fs';
 import { KMeans } from './k-means/KMeans';
 import { JSONParser } from './JSONParser';
 import { Vector } from './type/Vector';
 import { KMeansExporter } from './KMeansExporter';
+import { MedianCentroidCalculator } from './calculator/centroid_calculator/MedianCentroidCalculator';
 
 export * from './k-means/KMeans';
 export * from './Cluster';
-
-/*const training_data_set: Vector[] = JSON.parse(fs.readFileSync('training_data_set.json').toString());
-const kMeanstraining_data_set = new KMeans(training_data_set, 20);
-const exportertraining_data_set = new KMeansExporter('training_data_set.m', kMeanstraining_data_set);
-kMeanstraining_data_set.start();
-exportertraining_data_set.export();
-
-const data: Vector[] = JSON.parse(fs.readFileSync('data.json').toString());
-const kMeansdata = new KMeans(data, 15);
-const exporterdata = new KMeansExporter('data.m', kMeansdata);
-kMeansdata.start();
-exporterdata.export();
-
-const data2: Vector[] = JSON.parse(fs.readFileSync('data2.json').toString());
-const kMeansdata2 = new KMeans(data2, 4);
-const exporterdata2 = new KMeansExporter('data2.m', kMeansdata2);
-kMeansdata2.start();
-exporterdata2.export();*/
-
 /**/
 
-
-/*const data = [
-    'Das rote Auto hält an der roten Ampel.',
-    'Das grüne Auto hält an der grünen Ampel.'
-];
-
-const tf_idf = new TFIDF(data);
-const tfIdfResult = tf_idf.start();
-console.log(`Getting matrix`);
-const fitted_matrix = tf_idf.getVectorizedResult();
-tf_idf.printMostImportant();
-console.log(fitted_matrix);
-
-/**/
-
-console.log(`Parsing genres`);
+/*console.log(`Parsing genres`);
 const artist_to_genre = JSONParser.toMap('artist_to_genre.json');
 console.log(`Parsing lyrics`);
 const lyrics = JSONParser.toArray('artist_lyrics.json');
@@ -66,11 +31,11 @@ for (const artist of artist_to_genre.keys()) {
 }
 
 console.log(`Starting TF-IDF`);
-const tf_idf = new TFIDF(lyrics);
+const tf_idf = new TFIDFVectorizer(lyrics);
 const tfIdfResult = tf_idf.start();
 console.log(`Getting matrix`);
 const fitted_matrix = tf_idf.getVectorizedResult();
-console.log(fitted_matrix[0]);
+tf_idf.printMostImportant(1);
 
 console.log(`Fitting with K-Means`);
 const kMeans = new KMeans(fitted_matrix, 10);

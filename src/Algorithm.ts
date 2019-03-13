@@ -1,3 +1,3 @@
-export abstract class Algorithm<T> {
-    public abstract start(): T;
+export interface Algorithm<T> {
+    start(): T;
 }

@@ -1,5 +1,4 @@
 import { CountVectorizer } from './CountVectorizer';
-import { stringify } from 'querystring';
 
 export class TFIDFTransformer {
     private countVectorizer: CountVectorizer;
@@ -23,24 +22,33 @@ export class TFIDFTransformer {
 
     private calculateTFIDF() {
         this.tf_idf = [];
+        let sum = [];
 
         for (let i = 0; i < this.countVectorizer.getRowCount(); i++) {
+            sum[i] = 0;
             const map = new Map<string, number>();
-            const tf = this.countVectorizer.getRow(i);
+            const row = this.countVectorizer.getRow(i);
+            const tf = this.countVectorizer.getTF(i);
 
-            for (const term of tf.keys()) {
-                map.set(term, tf.get(term) * this.idf.get(term));
+            for (const term of row.keys()) {
+                map.set(term, row.get(term) * this.idf.get(term));
+                sum[i] += Math.pow(map.get(term), 2);
             }
+            sum[i] = Math.sqrt(sum[i]);
 
+            for (const term of map.keys()) {
+                map.set(term, map.get(term) / sum[i]);
+            }
             this.tf_idf[i] = map;
         }
     }
 
     private calculateIDF() {
-        this.idf = new Map<string, number>(this.countVectorizer.getTerms());
+        this.idf = new Map<string, number>();
+        const df = this.countVectorizer.getDocumentFrequency();
 
-        for (const term of this.idf.keys()) {
-            this.idf.set(term, Math.log((this.countVectorizer.getRowCount()) / ( this.idf.get(term))));
+        for (const term of df.keys()) {
+            this.idf.set(term, Math.log((this.countVectorizer.getRowCount() + 1) / (1 + df.get(term))) + 1);
         }
     }
 }

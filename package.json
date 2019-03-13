@@ -6,9 +6,6 @@
   "types": "build/index.d.ts",
   "dependencies": {
     "@alkocats/ex-math": "0.0.6",
-    "node-cmd": "^3.0.0",
-    "node-kmeans": "^1.1.8",
-    "node-tfidf": "0.0.2",
     "plotly": "^1.0.6"
   },
   "repository": {

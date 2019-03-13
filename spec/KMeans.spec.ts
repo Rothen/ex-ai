@@ -68,7 +68,45 @@ describe('KMeans', () => {
         expect(clusterB.getVectors()[1][1]).to.equal(2);
     });
 
-    /*
-        File-Test
-    */
+/*
+const training_data_set: Vector[] = JSON.parse(fs.readFileSync('training_data_set.json').toString());
+const kMeanstraining_data_set = new KMeans(training_data_set, 20);
+kMeanstraining_data_set.setCentroidCalculator(new MedianCentroidCalculator());
+const exportertraining_data_set = new KMeansExporter('training_data_set.m', kMeanstraining_data_set);
+kMeanstraining_data_set.start();
+exportertraining_data_set.export();
+
+const data: Vector[] = JSON.parse(fs.readFileSync('data.json').toString());
+const kMeansdata = new KMeans(data, 15);
+kMeansdata.setCentroidCalculator(new MedianCentroidCalculator());
+const exporterdata = new KMeansExporter('data.m', kMeansdata);
+kMeansdata.start();
+exporterdata.export();
+
+const data2: Vector[] = JSON.parse(fs.readFileSync('data2.json').toString());
+const kMeansdata2 = new KMeans(data2, 4);
+kMeansdata2.setCentroidCalculator(new MedianCentroidCalculator());
+const exporterdata2 = new KMeansExporter('data2.m', kMeansdata2);
+kMeansdata2.start();
+exporterdata2.export();
+
+const training_data_set: Vector[] = JSON.parse(fs.readFileSync('training_data_set.json').toString());
+    const kMeanstraining_data_set = new KMeans(training_data_set, 20);
+    const exportertraining_data_set = new KMeansExporter('training_data_set.m', kMeanstraining_data_set);
+    kMeanstraining_data_set.start();
+    exportertraining_data_set.export();
+
+    const data: Vector[] = JSON.parse(fs.readFileSync('data.json').toString());
+    const kMeansdata = new KMeans(data, 15);
+    const exporterdata = new KMeansExporter('data.m', kMeansdata);
+    kMeansdata.start();
+    exporterdata.export();
+
+    const data2: Vector[] = JSON.parse(fs.readFileSync('data2.json').toString());
+    const kMeansdata2 = new KMeans(data2, 4);
+    const exporterdata2 = new KMeansExporter('data2.m', kMeansdata2);
+    kMeansdata2.start();
+    exporterdata2.export();
+
+    /**/
 });
