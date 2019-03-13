@@ -6,6 +6,7 @@
   "types": "build/index.d.ts",
   "dependencies": {
     "@alkocats/ex-math": "0.0.6",
+    "ml-matrix": "^5.2.1",
     "plotly": "^1.0.6"
   },
   "repository": {

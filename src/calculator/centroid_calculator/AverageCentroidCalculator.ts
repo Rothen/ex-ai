@@ -1,8 +1,9 @@
 import { CentroidCalculator } from './CentroidCalculator';
 import { Vector } from '../../type/Vector';
+import { Matrix } from '../../type/Matrix';
 
 export class AverageCentroidCalculator extends CentroidCalculator {
-    public calculate(vectors: Vector[]): Vector {
+    public calculate(vectors: Vector[] | Matrix): Vector {
         const result: Vector = [];
 
         for (let i = 0; i < vectors.length; i++) {

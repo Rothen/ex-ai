@@ -6,9 +6,17 @@ import { JSONParser } from './JSONParser';
 import { Vector } from './type/Vector';
 import { KMeansExporter } from './KMeansExporter';
 import { MedianCentroidCalculator } from './calculator/centroid_calculator/MedianCentroidCalculator';
+import { PCA } from './pca/PCA';
 
 export * from './k-means/KMeans';
 export * from './Cluster';
+
+const data = [[40, 50, 60], [50, 70, 60], [80, 70, 90], [50, 60, 80]];
+const pca = new PCA(data);
+const vectors = pca.start();
+console.log(vectors);
+console.log(pca.analyseTopResult());
+
 /**/
 
 /*console.log(`Parsing genres`);
