@@ -4,8 +4,14 @@ import { Vector } from '../type/Vector';
 import { Matrix } from '../type/Matrix';
 import { AverageCentroidCalculator } from '../calculator/centroid_calculator/AverageCentroidCalculator';
 
+interface EigenContainer {
+    vector: Vector;
+    value: number;
+}
+
 export class PCA implements Algorithm<void> {
     private vectors: Vector[] | Matrix;
+    private eigenResults: EigenContainer[];
     private nComponents: number;
     private devSumOfSquares: Matrix;
     private varianceCovariance: Matrix;
@@ -16,15 +22,13 @@ export class PCA implements Algorithm<void> {
         this.vectors = vectors;
     }
 
-    public start(): any {
-
+    public start(): EigenContainer[] {
         this.computeDeviationMatrix();
-
         this.computeDeviationScores();
-
         this.computeVarianceCovariance(false);
+        this.computeSVD();
 
-        return this.computeSVD();
+        return this.eigenResults;
     }
 
     /**
@@ -44,7 +48,6 @@ export class PCA implements Algorithm<void> {
                 vector[c] -= centroid[c];
             }
         }
-        // return this.subtract(this.vectors, this.scale(this.multiply(unit, this.vectors), 1 / this.vectors.length));
     }
     /**
      * Computes variance from deviation
@@ -53,7 +56,7 @@ export class PCA implements Algorithm<void> {
      * @returns
      */
     public computeDeviationScores() {
-        // this.devSumOfSquares = this.multiply(this.transpose(this.vectors as Matrix), this.vectors as Matrix);
+        this.devSumOfSquares = this.multiply(this.transpose(this.vectors as Matrix), this.vectors as Matrix);
     }
     /**
      * Calculates the let colet square matrix using either population or sample
@@ -64,9 +67,9 @@ export class PCA implements Algorithm<void> {
      */
     public computeVarianceCovariance(sample) {
         if (sample) {
-            // this.varianceCovariance = this.scale(this.devSumOfSquares, 1 / (this.devSumOfSquares.length - 1));
+            this.varianceCovariance = this.scale(this.devSumOfSquares, 1 / (this.devSumOfSquares.length - 1));
         } else {
-            // this.varianceCovariance = this.scale(this.devSumOfSquares, 1 / (this.devSumOfSquares.length));
+            this.varianceCovariance = this.scale(this.devSumOfSquares, 1 / (this.devSumOfSquares.length));
         }
     }
     /**
@@ -76,26 +79,27 @@ export class PCA implements Algorithm<void> {
      * @returns
      */
     public computeSVD() {
-        console.log(`compute svd`);
+        this.eigenResults = [];
+
         const svd = new SingularValueDecomposition(this.vectors as number[][], {
             computeLeftSingularVectors: false,
             computeRightSingularVectors: true,
             autoTranspose: true
         });
-        console.log(`to2darray`);
-        this.eigenVectors = svd.leftSingularVectors.to2DArray() as Vector[];
-        this.eigenValues = svd.diagonal;
 
-        console.log(`result`);
-        let results = this.eigenValues.map((value, i) => {
-            let obj: any = {};
-            obj.eigenvalue = value;
-            obj.vector = this.eigenVectors.map((vector, j) => {
-                return -1 * vector[i]; // HACK prevent completely negative vectors
-            });
-            return obj;
+        const eigenVectors = svd.rightSingularVectors.to2DArray() as Vector[];
+        const eigenValues = svd.diagonal;
+
+        this.eigenResults = eigenValues.map((value, i) => {
+            const eigenResult: EigenContainer = {
+                value: value,
+                vector: eigenVectors.map((eigenVector, j) => {
+                    return -1 * eigenVector[i]; // HACK prevent completely negative vectors
+                })
+            }
+
+            return  eigenResult;
         });
-        return results;
     }
 
     /**
@@ -105,10 +109,10 @@ export class PCA implements Algorithm<void> {
      * @param {rest} vectors - eigenvectors selected as part of process
      * @returns
      */
-    public computeAdjustedData(...vectorObjs) {
+    public computeAdjustedData(selectedEigenResults: EigenContainer[]) {
         // FIXME no need to transpose vectors since they're already in row normal form
-        let vectors = vectorObjs.map(function(v) { return v.vector; });
-        let adjustedData = this.multiply(vectors, this.transpose(this.vectors as Matrix));
+        let vectors = selectedEigenResults.map(function(v) { return v.vector; });
+        let adjustedData = this.multiply(vectors as any as Matrix, this.transpose(this.vectors as Matrix));
         let unit = this.unitSquareMatrix(this.vectors.length);
         // tslint:disable-next-line:max-line-length
         let avgData = this.scale(this.multiply(unit, this.vectors as Matrix), -1 / this.vectors.length); // NOTE get the averages to add back
@@ -143,21 +147,17 @@ export class PCA implements Algorithm<void> {
      * @param {*} vectors
      * @param {*} selected
      */
-    public computePercentageExplained(vectors, ...selected) {
-        console.log(vectors);
-        let total = vectors.map(function (v: any) {
-            return v.eigenvalue;
+    public computePercentageExplained(selected: EigenContainer[]) {
+        let total = this.eigenResults.map(function (v: EigenContainer) {
+            return v.value;
         }).reduce(function (a, b) {
             return a + b;
         });
-        let explained = selected.map(function (v: any) {
-            return v.eigenvalue;
+        let explained = selected.map(function (v: EigenContainer) {
+            return v.value;
         }).reduce(function (a, b) {
             return a + b;
         });
-
-        console.log(explained);
-        console.log(total);
 
         return (explained * 100 / total);
     }
@@ -171,9 +171,9 @@ export class PCA implements Algorithm<void> {
     }
 
     public analyseTopResult() {
-        const eigenVectors = this.computeSVD();
-        const sorted = eigenVectors.sort((a: any, b: any) => {
-            return b.eigenvalue - a.eigenvalue;
+        this.computeSVD();
+        const sorted = this.eigenResults.sort((containerA: EigenContainer, containerB: EigenContainer) => {
+            return containerA.value - containerB.value;
         });
 
         const selected = (sorted[0] as any).vector;

@@ -63,7 +63,36 @@ const data = [[40, 50, 60], [50, 70, 60], [80, 70, 90], [50, 60, 80]];
 const pca = new PCA(data);
 const vectors = pca.start();
 console.log(vectors);
-console.log(pca.computePercentageExplained(vectors, vectors[0], vectors[1], vectors[2]));
+console.log(pca.computePercentageExplained([vectors[0], vectors[1]]));
+const computed = pca.computeAdjustedData([vectors[0], vectors[1]]);
+console.log(computed);
+
+const plotly = Plotly('DarkSephiroth', 'B1y6jFXsprLx9sjLadsg');
+const plotData: Plotly.PlotData[] = [{
+    x: [40, 50, 80, 70, 50],
+    y: [50, 70, 70, 60],
+    z: [60, 60, 90, 80],
+    type: 'scatter3d',
+    mode: 'markers',
+    name: 'correct'
+}, {
+    x: computed.formattedAdjustedData[0],
+    y: computed.formattedAdjustedData[1],
+    type: 'scatter',
+    mode: 'markers',
+    name: 'predicted'
+}];
+
+const layout = { title: 'Hover over the points to see the text' };
+const graphOptions = { layout: layout, filename: 'hover-chart-basic', fileopt: 'overwrite' };
+
+plotly.plot(plotData, graphOptions, (err: string, msg: string) => {
+    if (err) {
+        return console.log(err);
+    }
+
+    console.log(msg);
+});
 
 /**/
 
