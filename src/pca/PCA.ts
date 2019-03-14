@@ -17,8 +17,11 @@ export class PCA implements Algorithm<void> {
     }
 
     public start(): any {
+
         this.computeDeviationMatrix();
+
         this.computeDeviationScores();
+
         this.computeVarianceCovariance(false);
 
         return this.computeSVD();
@@ -50,7 +53,7 @@ export class PCA implements Algorithm<void> {
      * @returns
      */
     public computeDeviationScores() {
-        this.devSumOfSquares = this.multiply(this.transpose(this.vectors as Matrix), this.vectors as Matrix);
+        // this.devSumOfSquares = this.multiply(this.transpose(this.vectors as Matrix), this.vectors as Matrix);
     }
     /**
      * Calculates the let colet square matrix using either population or sample
@@ -61,9 +64,9 @@ export class PCA implements Algorithm<void> {
      */
     public computeVarianceCovariance(sample) {
         if (sample) {
-            this.varianceCovariance = this.scale(this.devSumOfSquares, 1 / (this.devSumOfSquares.length - 1));
+            // this.varianceCovariance = this.scale(this.devSumOfSquares, 1 / (this.devSumOfSquares.length - 1));
         } else {
-            this.varianceCovariance = this.scale(this.devSumOfSquares, 1 / (this.devSumOfSquares.length));
+            // this.varianceCovariance = this.scale(this.devSumOfSquares, 1 / (this.devSumOfSquares.length));
         }
     }
     /**
@@ -73,10 +76,17 @@ export class PCA implements Algorithm<void> {
      * @returns
      */
     public computeSVD() {
-        const svd = new SingularValueDecomposition(this.varianceCovariance as number[][]);
+        console.log(`compute svd`);
+        const svd = new SingularValueDecomposition(this.vectors as number[][], {
+            computeLeftSingularVectors: false,
+            computeRightSingularVectors: true,
+            autoTranspose: true
+        });
+        console.log(`to2darray`);
         this.eigenVectors = svd.leftSingularVectors.to2DArray() as Vector[];
         this.eigenValues = svd.diagonal;
 
+        console.log(`result`);
         let results = this.eigenValues.map((value, i) => {
             let obj: any = {};
             obj.eigenvalue = value;
@@ -134,6 +144,7 @@ export class PCA implements Algorithm<void> {
      * @param {*} selected
      */
     public computePercentageExplained(vectors, ...selected) {
+        console.log(vectors);
         let total = vectors.map(function (v: any) {
             return v.eigenvalue;
         }).reduce(function (a, b) {
@@ -144,7 +155,11 @@ export class PCA implements Algorithm<void> {
         }).reduce(function (a, b) {
             return a + b;
         });
-        return (explained / total);
+
+        console.log(explained);
+        console.log(total);
+
+        return (explained * 100 / total);
     }
 
     public getEigenVectors(): Vector[] {

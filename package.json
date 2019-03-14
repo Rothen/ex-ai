@@ -7,6 +7,7 @@
   "dependencies": {
     "@alkocats/ex-math": "0.0.6",
     "ml-matrix": "^5.2.1",
+    "ml-pca": "^2.1.0",
     "plotly": "^1.0.6"
   },
   "repository": {

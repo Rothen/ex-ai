@@ -3,7 +3,6 @@ import * as Plotly from 'plotly';
 import * as fs from 'fs';
 import { KMeans } from './k-means/KMeans';
 import { JSONParser } from './JSONParser';
-import { Vector } from './type/Vector';
 import { KMeansExporter } from './KMeansExporter';
 import { MedianCentroidCalculator } from './calculator/centroid_calculator/MedianCentroidCalculator';
 import { PCA } from './pca/PCA';
@@ -11,15 +10,64 @@ import { PCA } from './pca/PCA';
 export * from './k-means/KMeans';
 export * from './Cluster';
 
-/*const data = [[40, 50, 60], [50, 70, 60], [80, 70, 90], [50, 60, 80]];
+
+
+class Matrix {
+    private matrix: number[][];
+    private rows: number;
+    private columns: number;
+
+    constructor(rows: number = 0, columns: number = 0) {
+        if (rows > 0) {
+            this.matrix = new Array<Array<number>>(rows);
+            if (columns > 0) {
+                for (let row = 0; row < rows; row++) {
+                    this.matrix[row] = new Array<number>(columns);
+                }
+            }
+        } else {
+            this.matrix = new Array();
+        }
+
+        this.rows = rows;
+        this.columns = columns;
+    }
+
+    public getData(): number[][] {
+        return this.matrix;
+    }
+}
+
+class Vector {
+    private vector: number[];
+    private type: 'column' | 'row';
+    private length: number;
+
+    constructor(length: number = 0, type: 'column' | 'row' = 'column') {
+        this.length = length;
+        this.type = type;
+
+        if (length > 0) {
+            this.vector = new Array<number>(length);
+        } else {
+            this.vector = new Array<number>();
+        }
+    }
+
+    public getData(): number[] {
+        return this.vector;
+    }
+}
+
+const data = [[40, 50, 60], [50, 70, 60], [80, 70, 90], [50, 60, 80]];
 const pca = new PCA(data);
 const vectors = pca.start();
 console.log(vectors);
-console.log(pca.analyseTopResult());
+console.log(pca.computePercentageExplained(vectors, vectors[0], vectors[1], vectors[2]));
 
 /**/
 
-console.log(`Parsing genres`);
+/*console.log(`Parsing genres`);
 const artist_to_genre = JSONParser.toMap('artist_to_genre.json');
 console.log(`Parsing lyrics`);
 const lyrics = JSONParser.toArray('artist_lyrics.json');
@@ -43,14 +91,23 @@ const tf_idf = new TFIDFVectorizer(lyrics);
 const tfIdfResult = tf_idf.start();
 console.log(`Getting matrix`);
 const fitted_matrix = tf_idf.getVectorizedResult();
-tf_idf.printMostImportant(1);
+// tf_idf.printMostImportant(1);
 
-const pca = new PCA(fitted_matrix);
+/*console.log(`Starting PCA`);
+const PCA = require('ml-pca');
+const pca = new PCA(tfIdfResult);
+console.log(pca.getExplainedVariance());
+/**/
+/*const pca = new PCA(fitted_matrix);
 const vectors = pca.start();
-console.log(vectors);
+console.log(vectors[0]);
+console.log(vectors[1]);
+console.log(vectors[2]);
+console.log(pca.computePercentageExplained(vectors, [vectors[0], vectors[1]]));
+/**/
 // console.log(pca.analyseTopResult());
 
-console.log(`Fitting with K-Means`);
+/*console.log(`Fitting with K-Means`);
 const kMeans = new KMeans(fitted_matrix, 10);
 const result = kMeans.start();
 console.log(`${result.iterations} iterations needed`);
