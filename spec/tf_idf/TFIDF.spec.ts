@@ -24,8 +24,6 @@ describe('TFIDF', () => {
         tf_idf.start();
         const fitted_matrix = tf_idf.getVectorizedResult();
 
-        console.log(fitted_matrix);
-
         expect(fitted_matrix).to.deep.equal([
             [ 0.85151334721046, 0.5243329281310096, 0 ],
             [ 1, 0, 0 ],

@@ -12,20 +12,6 @@ import { AverageCentroidCalculator } from './calculator/centroid_calculator/Aver
 export * from './k-means/KMeans';
 export * from './pca/PCA';
 export * from './Cluster';
-const corpus = [
-    'dada dada dada dun',
-    'dada dada',
-    'dada dada dada',
-    'dada dada dada dada',
-    'dada dada dada dan dan',
-    'dada dada dada dun dun',
-];
-
-const tf_idf = new TFIDFVectorizer(corpus);
-tf_idf.start();
-const fitted_matrix = tf_idf.getVectorizedResult();
-
-console.log(fitted_matrix);
 
 /*expect(fitted_matrix).to.deep.equal([
     [ 0.85151334721046, 0.5243329281310096, 0 ],

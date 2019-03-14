@@ -113,7 +113,8 @@ export class TFIDFVectorizer implements Algorithm<TFIDFResult> {
         return result;
     }
 
-    public printMostImportant(n: number = 10) {
+    public printMostImportant(n: number = 10): { term: string, weight: number }[][] {
+        const result = [];
         let idf = this.tfidftransfomer.getTfIdf();
 
         for (const res of idf) {
@@ -142,8 +143,9 @@ export class TFIDFVectorizer implements Algorithm<TFIDFResult> {
                     highest.splice(highest.indexOf(smallest), 1);
                 }
             }
-
-            console.log(highest);
+            result.push(highest);
         }
+
+        return result;
     }
 }
