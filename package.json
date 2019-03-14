@@ -7,7 +7,6 @@
   "dependencies": {
     "@alkocats/ex-math": "0.0.6",
     "ml-matrix": "^5.2.1",
-    "ml-pca": "^2.1.0",
     "plotly": "^1.0.6"
   },
   "repository": {
@@ -18,7 +17,6 @@
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.6",
     "@types/node": "^10.12.21",
-    "@types/plotly.js": "^1.44.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.2",
     "mocha": "^6.0.0",

@@ -5,7 +5,7 @@ interface RAKEResult {
 
 }
 
-export class RAKE extends Algorithm<RAKEResult> {
+export class RAKE implements Algorithm<RAKEResult> {
     private text: string;
     private terms: string[];
     private stoplist: string[];
@@ -18,7 +18,6 @@ export class RAKE extends Algorithm<RAKEResult> {
     private termScoreCache: {};
 
     constructor(text: string, stoplist: string[] = StoplistEN) {
-        super();
         this.text = text;
         this.terms = this.text.match(this.termSplitRegex);
         this.stoplist = stoplist;
