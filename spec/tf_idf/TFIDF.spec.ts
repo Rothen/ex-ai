@@ -1,12 +1,12 @@
 import { expect } from 'chai';
-import { TFIDF } from '../../src/tf_idf/TFIDF';
+import { TFIDFVectorizer } from '../../src/tf_idf/TFIDFVectorizer';
 
 describe('TFIDF', () => {
     beforeEach(() => {
     });
 
     it('should be created', () => {
-        const tf_idf = new TFIDF([]);
+        const tf_idf = new TFIDFVectorizer([]);
         expect(tf_idf).to.be.ok;
     });
 
@@ -20,9 +20,11 @@ describe('TFIDF', () => {
             'dada dada dada dun dun',
         ];
 
-        const tf_idf = new TFIDF(corpus);
+        const tf_idf = new TFIDFVectorizer(corpus);
         tf_idf.start();
         const fitted_matrix = tf_idf.getVectorizedResult();
+
+        console.log(fitted_matrix);
 
         expect(fitted_matrix).to.deep.equal([
             [ 0.85151334721046, 0.5243329281310096, 0 ],

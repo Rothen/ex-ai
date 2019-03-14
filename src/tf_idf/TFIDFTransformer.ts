@@ -24,14 +24,13 @@ export class TFIDFTransformer {
         this.tf_idf = [];
         let sum = [];
 
-        for (let i = 0; i < this.countVectorizer.getRowCount(); i++) {
+        for (let i = 0; i < this.countVectorizer.getTermFrequenciesCount(); i++) {
             sum[i] = 0;
             const map = new Map<string, number>();
-            const row = this.countVectorizer.getRow(i);
-            const tf = this.countVectorizer.getTF(i);
+            const termFrequency = this.countVectorizer.getTermFrequency(i);
 
-            for (const term of row.keys()) {
-                map.set(term, row.get(term) * this.idf.get(term));
+            for (const term of termFrequency.keys()) {
+                map.set(term, termFrequency.get(term) * this.idf.get(term));
                 sum[i] += Math.pow(map.get(term), 2);
             }
             sum[i] = Math.sqrt(sum[i]);
@@ -48,7 +47,7 @@ export class TFIDFTransformer {
         const df = this.countVectorizer.getDocumentFrequency();
 
         for (const term of df.keys()) {
-            this.idf.set(term, Math.log((this.countVectorizer.getRowCount() + 1) / (1 + df.get(term))) + 1);
+            this.idf.set(term, Math.log((this.countVectorizer.getTermFrequenciesCount() + 1) / (1 + df.get(term))) + 1);
         }
     }
 }

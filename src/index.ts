@@ -10,46 +10,33 @@ import { Matrix } from './type/Matrix';
 import { AverageCentroidCalculator } from './calculator/centroid_calculator/AverageCentroidCalculator';
 
 export * from './k-means/KMeans';
+export * from './pca/PCA';
 export * from './Cluster';
+const corpus = [
+    'dada dada dada dun',
+    'dada dada',
+    'dada dada dada',
+    'dada dada dada dada',
+    'dada dada dada dan dan',
+    'dada dada dada dun dun',
+];
 
+const tf_idf = new TFIDFVectorizer(corpus);
+tf_idf.start();
+const fitted_matrix = tf_idf.getVectorizedResult();
 
-const iris = JSON.parse(fs.readFileSync('iris.json').toString());
-const matrix: Matrix = [];
+console.log(fitted_matrix);
 
-for (const iri of iris) {
-    matrix.push([
-        iri.sepal_length,
-        iri.sepal_width,
-        iri.petal_length,
-        iri.peatl_width
-    ]);
-}
+/*expect(fitted_matrix).to.deep.equal([
+    [ 0.85151334721046, 0.5243329281310096, 0 ],
+    [ 1, 0, 0 ],
+    [ 1, 0, 0 ],
+    [ 1, 0, 0 ],
+    [ 0.5542289327998063, 0, 0.8323642772534078 ],
+    [ 0.63035730725644, 0.7763051366495072, 0 ]
+]);*/
 
-const mean = new AverageCentroidCalculator().calculate(matrix);
-const standardDeviation = [];
-
-
-for (let c = 0; c < matrix[0].length; c++) {
-    standardDeviation[c] = 0;
-
-    for (let r = 0; r < matrix.length; r++) {
-        standardDeviation[c] += Math.pow(matrix[r][c] - mean[c], 2);
-    }
-
-    standardDeviation[c] = Math.sqrt(1 * standardDeviation[c] / matrix.length);
-}
-
-for (let c = 0; c < matrix[0].length; c++) {
-    for (let r = 0; r < matrix.length; r++) {
-        matrix[r][c] = (matrix[r][c] - mean[c]) / standardDeviation[c];
-    }
-}
-
-const pca = new PCA(matrix);
-const result = pca.start();
-const adjustedData = pca.computeAdjustedData([result[0], result[1]]);
-
-const plotly = Plotly('DarkSephiroth', 'B1y6jFXsprLx9sjLadsg');
+/*const plotly = Plotly('DarkSephiroth', 'B1y6jFXsprLx9sjLadsg');
 const plotData: Plotly.PlotData[] = [{
     x: adjustedData[0],
     y: adjustedData[1],
@@ -67,7 +54,7 @@ plotly.plot(plotData, graphOptions, (err: string, msg: string) => {
     }
 
     console.log(msg);
-});
+});*/
 
 
 

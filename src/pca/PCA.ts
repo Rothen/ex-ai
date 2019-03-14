@@ -9,26 +9,85 @@ interface EigenContainer {
     value: number;
 }
 
-export class PCA implements Algorithm<void> {
-    private vectors: Vector[] | Matrix;
+export class PCA {
     private eigenResults: EigenContainer[];
     private nComponents: number;
     private devSumOfSquares: Matrix;
     private varianceCovariance: Matrix;
     private eigenVectors: Vector[];
     private eigenValues: number[];
+    private sumEigenValues;
 
-    constructor(vectors: Vector[] | Matrix) {
-        this.vectors = vectors;
+    constructor() {
     }
 
-    public start(): EigenContainer[] {
-        this.computeDeviationMatrix();
-        this.computeDeviationScores();
+    public learn(data: Matrix): EigenContainer[] {
+        this.computeDeviationMatrix(data);
+        this.computeDeviationScores(data);
         this.computeVarianceCovariance(false);
-        this.computeSVD();
+        this.computeSVD(data);
 
         return this.eigenResults;
+    }
+
+    public learnTransform(data: Matrix, dimensions: number): Vector[] | Matrix {
+        this.learn(data);
+        return this.transform(data, dimensions);
+    }
+
+    public learnTransformByPercentage(data: Matrix, percentage: number): Vector[] | Matrix {
+        this.learn(data);
+        return this.transformByPercentage(data, percentage);
+    }
+
+    public getEigenVectors(): Vector[] {
+        return this.eigenVectors;
+    }
+
+    public getEigenValues(): number[] {
+        return this.eigenValues;
+    }
+
+    public transform(data: Vector[] | Matrix, dimensions: number): Vector[] | Matrix {
+        // FIXME no need to transpose vectors since they're already in row normal form
+        const eigenMatrix: Matrix = this.eigenResults.slice(0, dimensions).map(function(v) { return v.vector; }) as any as Matrix;
+        const adjustedData = this.multiply(eigenMatrix, this.transpose(data as Matrix));
+
+        return adjustedData;
+    }
+
+    public transformByPercentage(data: Vector[] | Matrix, percentage: number): Vector[] | Matrix {
+        percentage /= 100;
+        let sumPercentage = 0;
+        const eigenVectors = [];
+
+        for (const eigenResult of this.eigenResults) {
+            sumPercentage += eigenResult.value / this.sumEigenValues;
+            eigenVectors.push(eigenResult.vector);
+
+            if (sumPercentage >= percentage) {
+                break;
+            }
+        }
+
+        // FIXME no need to transpose vectors since they're already in row normal form
+        const adjustedData = this.multiply(eigenVectors, this.transpose(data as Matrix));
+
+        return adjustedData;
+    }
+
+    public getExplainedPercentagePerDimension(): Map<number, number> {
+        const result = new Map<number, number>();
+        let sumPercentage = 0;
+
+        for (let i = 0; i < this.eigenResults.length; i++) {
+            const eigenResult = this.eigenResults[i];
+            sumPercentage += eigenResult.value / this.sumEigenValues;
+
+            result.set(i + 1, sumPercentage * 100);
+        }
+
+        return result;
     }
 
     /**
@@ -37,26 +96,27 @@ export class PCA implements Algorithm<void> {
      * @param {Array} matrix - data in an mXn matrix format
      * @returns
      */
-    public computeDeviationMatrix() {
+    public computeDeviationMatrix(data: Matrix) {
         const centroidCalculator = new AverageCentroidCalculator();
-        const centroid = centroidCalculator.calculate(this.vectors);
+        const centroid = centroidCalculator.calculate(data);
 
-        for (let i = 0; i < this.vectors.length; i++) {
-            const vector = this.vectors[i];
+        for (let i = 0; i < data.length; i++) {
+            const vector = data[i];
 
             for (let c = 0; c < vector.length; c++) {
                 vector[c] -= centroid[c];
             }
         }
     }
+
     /**
      * Computes variance from deviation
      *
      * @param {Array} deviation - data minus mean as calculated from computeDeviationMatrix
      * @returns
      */
-    public computeDeviationScores() {
-        this.devSumOfSquares = this.multiply(this.transpose(this.vectors as Matrix), this.vectors as Matrix);
+    public computeDeviationScores(data: Matrix) {
+        this.devSumOfSquares = this.multiply(this.transpose(data), data);
     }
     /**
      * Calculates the let colet square matrix using either population or sample
@@ -78,10 +138,11 @@ export class PCA implements Algorithm<void> {
      * @param {Array} matrix - output of computeDeviationScores
      * @returns
      */
-    public computeSVD() {
+    public computeSVD(data: Matrix) {
         this.eigenResults = [];
+        this.sumEigenValues = 0;
 
-        const svd = new SingularValueDecomposition(this.vectors as number[][], {
+        const svd = new SingularValueDecomposition(data as number[][], {
             computeLeftSingularVectors: false,
             computeRightSingularVectors: true,
             autoTranspose: true
@@ -96,20 +157,12 @@ export class PCA implements Algorithm<void> {
                 vector: eigenVectors.map((eigenVector, j) => {
                     return eigenVector[i];
                 })
-            }
+            };
+
+            this.sumEigenValues += value;
 
             return  eigenResult;
         });
-    }
-
-    public computeAdjustedData(selectedEigenResults: EigenContainer[]): Vector[] | Matrix {
-        // FIXME no need to transpose vectors since they're already in row normal form
-        let eigenVectors = selectedEigenResults.map(function(v) { return v.vector; });
-        let adjustedData = this.multiply(eigenVectors as any as Matrix, this.transpose(this.vectors as Matrix));
-
-        // adjustedData[1] = adjustedData[1].map((v: number) => v * -1);
-
-        return adjustedData;
     }
 
     /**
@@ -118,7 +171,7 @@ export class PCA implements Algorithm<void> {
      * @param {*} vectors = selectedVectors
      * @param {*} avgData = avgData
      */
-    public computeOriginalData(adjustedData, vectors, avgData) {
+    /*public computeOriginalData(adjustedData, vectors, avgData) {
         let originalWithoutMean = this.transpose(this.multiply(this.transpose(vectors), adjustedData));
         let originalWithMean = this.subtract(originalWithoutMean, avgData);
         let formattedData = originalWithMean;
@@ -126,45 +179,7 @@ export class PCA implements Algorithm<void> {
             originalData: originalWithMean,
             formattedOriginalData: formattedData
         };
-    }
-
-    /**
-     * Get percentage explained, or loss
-     * @param {*} vectors
-     * @param {*} selected
-     */
-    public computePercentageExplained(selected: EigenContainer[]) {
-        let total = this.eigenResults.map(function (v: EigenContainer) {
-            return v.value;
-        }).reduce(function (a, b) {
-            return a + b;
-        });
-        let explained = selected.map(function (v: EigenContainer) {
-            return v.value;
-        }).reduce(function (a, b) {
-            return a + b;
-        });
-
-        return (explained * 100 / total);
-    }
-
-    public getEigenVectors(): Vector[] {
-        return this.eigenVectors;
-    }
-
-    public getEigenValues(): number[] {
-        return this.eigenValues;
-    }
-
-    public analyseTopResult() {
-        this.computeSVD();
-        const sorted = this.eigenResults.sort((containerA: EigenContainer, containerB: EigenContainer) => {
-            return containerA.value - containerB.value;
-        });
-
-        const selected = (sorted[0] as any).vector;
-        return this.computeAdjustedData(selected);
-    }
+    }*/
 
     /**
      * Multiplies AxB, where A and B are matrices of nXm and mXn dimensions

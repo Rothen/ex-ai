@@ -11,11 +11,12 @@ export class CountVectorizer {
     private stoplist: string[];
     private regex: RegExp;
     private tfs: TF[];
-    private maxDofcumentFrequency = 0.5;
+    private maxDocumentFrequency: number;
 
-    constructor(texts: string[], stoplist: string[] = StoplistEN) {
+    constructor(texts: string[], stoplist: string[] = StoplistEN, maxDocumentFrequency: number = 1) {
         this.texts = texts;
         this.stoplist = stoplist;
+        this.maxDocumentFrequency = maxDocumentFrequency;
         this.buildRegExp();
     }
 
@@ -32,11 +33,11 @@ export class CountVectorizer {
         return this.documentFrequency;
     }
 
-    public getRowCount(): number {
+    public getTermFrequenciesCount(): number {
         return this.termFrequencies.length;
     }
 
-    public getRow(i: number): Map<string, number> {
+    public getTermFrequency(i: number): Map<string, number> {
         return this.termFrequencies[i];
     }
 
@@ -120,13 +121,14 @@ export class CountVectorizer {
                 }
                 this.documentFrequency.set(term, this.documentFrequency.get(term) + 1);
             }
-
             this.termFrequencies.push(map);
         }
 
         for (const term of this.documentFrequency.keys()) {
-            if (this.documentFrequency.get(term) / this.getRowCount() > this.maxDofcumentFrequency) {
+            if (this.documentFrequency.get(term) / this.getTermFrequenciesCount() > this.maxDocumentFrequency) {
                 this.documentFrequency.delete(term);
+                this.terms.delete(term);
+
                 for (const termFrequency of  this.termFrequencies) {
                     termFrequency.delete(term);
                 }
