@@ -6,13 +6,75 @@ import { JSONParser } from './JSONParser';
 import { KMeansExporter } from './KMeansExporter';
 import { MedianCentroidCalculator } from './calculator/centroid_calculator/MedianCentroidCalculator';
 import { PCA } from './pca/PCA';
+import { Matrix } from './type/Matrix';
+import { AverageCentroidCalculator } from './calculator/centroid_calculator/AverageCentroidCalculator';
 
 export * from './k-means/KMeans';
 export * from './Cluster';
 
 
+const iris = JSON.parse(fs.readFileSync('iris.json').toString());
+const matrix: Matrix = [];
 
-class Matrix {
+for (const iri of iris) {
+    matrix.push([
+        iri.sepal_length,
+        iri.sepal_width,
+        iri.petal_length,
+        iri.peatl_width
+    ]);
+}
+
+const mean = new AverageCentroidCalculator().calculate(matrix);
+const standardDeviation = [];
+
+
+for (let c = 0; c < matrix[0].length; c++) {
+    standardDeviation[c] = 0;
+
+    for (let r = 0; r < matrix.length; r++) {
+        standardDeviation[c] += Math.pow(matrix[r][c] - mean[c], 2);
+    }
+
+    standardDeviation[c] = Math.sqrt(1 * standardDeviation[c] / matrix.length);
+}
+
+for (let c = 0; c < matrix[0].length; c++) {
+    for (let r = 0; r < matrix.length; r++) {
+        matrix[r][c] = (matrix[r][c] - mean[c]) / standardDeviation[c];
+    }
+}
+
+const pca = new PCA(matrix);
+const result = pca.start();
+const adjustedData = pca.computeAdjustedData([result[0], result[1]]);
+
+const plotly = Plotly('DarkSephiroth', 'B1y6jFXsprLx9sjLadsg');
+const plotData: Plotly.PlotData[] = [{
+    x: adjustedData[0],
+    y: adjustedData[1],
+    type: 'scatter',
+    mode: 'markers',
+    name: 'Iris'
+}];
+
+const layout = { title: 'Hover over the points to see the text' };
+const graphOptions = { layout: layout, filename: 'hover-chart-basic', fileopt: 'overwrite' };
+
+plotly.plot(plotData, graphOptions, (err: string, msg: string) => {
+    if (err) {
+        return console.log(err);
+    }
+
+    console.log(msg);
+});
+
+
+
+
+
+
+/*class Matrix {
     private matrix: number[][];
     private rows: number;
     private columns: number;

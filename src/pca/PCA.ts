@@ -94,7 +94,7 @@ export class PCA implements Algorithm<void> {
             const eigenResult: EigenContainer = {
                 value: value,
                 vector: eigenVectors.map((eigenVector, j) => {
-                    return -1 * eigenVector[i]; // HACK prevent completely negative vectors
+                    return eigenVector[i];
                 })
             }
 
@@ -102,28 +102,14 @@ export class PCA implements Algorithm<void> {
         });
     }
 
-    /**
-     * Get reduced dataset after removing some dimensions
-     *
-     * @param {Array} data - initial matrix started out with
-     * @param {rest} vectors - eigenvectors selected as part of process
-     * @returns
-     */
-    public computeAdjustedData(selectedEigenResults: EigenContainer[]) {
+    public computeAdjustedData(selectedEigenResults: EigenContainer[]): Vector[] | Matrix {
         // FIXME no need to transpose vectors since they're already in row normal form
-        let vectors = selectedEigenResults.map(function(v) { return v.vector; });
-        let adjustedData = this.multiply(vectors as any as Matrix, this.transpose(this.vectors as Matrix));
-        let unit = this.unitSquareMatrix(this.vectors.length);
-        // tslint:disable-next-line:max-line-length
-        let avgData = this.scale(this.multiply(unit, this.vectors as Matrix), -1 / this.vectors.length); // NOTE get the averages to add back
+        let eigenVectors = selectedEigenResults.map(function(v) { return v.vector; });
+        let adjustedData = this.multiply(eigenVectors as any as Matrix, this.transpose(this.vectors as Matrix));
 
-        let formattedAdjustData = this.formatData(adjustedData, 2);
-        return {
-            adjustedData: adjustedData,
-            formattedAdjustedData: formattedAdjustData,
-            avgData: avgData,
-            selectedVectors: vectors
-        };
+        // adjustedData[1] = adjustedData[1].map((v: number) => v * -1);
+
+        return adjustedData;
     }
 
     /**
@@ -135,7 +121,7 @@ export class PCA implements Algorithm<void> {
     public computeOriginalData(adjustedData, vectors, avgData) {
         let originalWithoutMean = this.transpose(this.multiply(this.transpose(vectors), adjustedData));
         let originalWithMean = this.subtract(originalWithoutMean, avgData);
-        let formattedData = this.formatData(originalWithMean, 2);
+        let formattedData = originalWithMean;
         return {
             originalData: originalWithMean,
             formattedOriginalData: formattedData
@@ -178,16 +164,6 @@ export class PCA implements Algorithm<void> {
 
         const selected = (sorted[0] as any).vector;
         return this.computeAdjustedData(selected);
-    }
-
-    public formatData(data, precision) {
-        const TEN = Math.pow(10, precision || 2);
-
-        return data.map(function (d, i) {
-            return d.map(function (n) {
-                return Math.round(n * TEN) / TEN;
-            });
-        });
     }
 
     /**
