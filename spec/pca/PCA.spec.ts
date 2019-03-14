@@ -19,7 +19,7 @@ describe('PCA', () => {
                 iri.sepal_length,
                 iri.sepal_width,
                 iri.petal_length,
-                iri.peatl_width
+                iri.petal_width
             ]);
         }
 
