@@ -7,7 +7,7 @@
 [![MIT License](https://img.shields.io/github/license/Rothen/ex-ai.svg)](https://github.com/Rothen/ex-ai/blob/master/LICENSE)
 [![Known Vulnerabilities](https://snyk.io/test/github/Rothen/ex-ai/badge.svg)](https://snyk.io/test/github/Rothen/ex-ai)
 [![dependencies Status](https://david-dm.org/Rothen/ex-ai/status.svg)](https://david-dm.org/Rothen/ex-ai)
-[![devDependencies Status](https://david-dm.org/Rothen/ex-ai/dev-status.svg)](https://david-dm.org/Rothen/ex-ai?type=dev)
+[![devDependencies Status](https://david-dm.org/Rothen/ex-ai/dev-status.svg)](https://david-dm.org/Rothen/ex-ai?type=dev) [![Greenkeeper badge](https://badges.greenkeeper.io/Rothen/ex-ai.svg)](https://greenkeeper.io/)
 
 - [Installation](#installation)
 - [Usage](#usage)
